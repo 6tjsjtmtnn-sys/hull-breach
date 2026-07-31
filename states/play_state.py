@@ -1,14 +1,42 @@
+import random
+
 import pygame
 
 import hud
-from constants import BLACK, HAZARD_DAMAGE, MAX_OXYGEN, OXYGEN_DRAIN_RATE, OXYGEN_PICKUP_AMOUNT, SCREEN_HEIGHT, SCREEN_WIDTH
+from constants import (
+    BLACK,
+    HAZARD_DAMAGE,
+    MAX_OXYGEN,
+    OXYGEN_DRAIN_RATE,
+    OXYGEN_PICKUP_AMOUNT,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    STATION_BLUE,
+    WARNING_ORANGE,
+    WHITE,
+)
 from entities.drone import Drone
+from entities.particle import Particle
 from entities.player import Player
 from levels.camera import Camera
 from levels.data.level_01 import LEVEL
 from levels.level import Level
 from states.base_state import State
 from states.game_over_state import GameOverState
+
+BACKGROUND_TOP = (16, 20, 34)
+THRUSTER_SPAWN_CHANCE = 0.6
+DRONE_SPARK_SPAWN_CHANCE = 0.05
+STEAM_SPAWN_CHANCE = 0.06
+
+
+def _build_background():
+    surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    for y in range(SCREEN_HEIGHT):
+        t = y / SCREEN_HEIGHT
+        color = tuple(round(a + (b - a) * t) for a, b in zip(BACKGROUND_TOP, BLACK))
+        pygame.draw.line(surface, color, (0, y), (SCREEN_WIDTH, y))
+    return surface
 
 
 class PlayState(State):
@@ -21,12 +49,14 @@ class PlayState(State):
 
         self.level = Level(LEVEL)
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, self.level.width, self.level.height)
+        self.background = _build_background()
 
         spawn_x, spawn_y = self.level.player_spawn
         self.player = Player(spawn_x, spawn_y)
         self.drones = [Drone(x, y) for x, y in self.level.drone_spawns]
         self._touching_flip_zone = False
         self.oxygen = MAX_OXYGEN
+        self.particles = []
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
@@ -43,6 +73,7 @@ class PlayState(State):
         self._check_hazards()
         self._check_flip_zones()
         self._check_pickups()
+        self._update_particles(dt)
 
         self.oxygen = max(0.0, self.oxygen - OXYGEN_DRAIN_RATE * dt)
         if self.oxygen <= 0:
@@ -77,10 +108,42 @@ class PlayState(State):
                 self.oxygen = min(MAX_OXYGEN, self.oxygen + OXYGEN_PICKUP_AMOUNT)
                 self.level.tiles.remove(pickup)
 
+    def _update_particles(self, dt):
+        if not self.player.on_ground or self.player.velocity.x != 0:
+            if random.random() < THRUSTER_SPAWN_CHANCE:
+                vel = pygame.Vector2(
+                    -self.player.velocity.x * 0.15 + random.uniform(-15, 15),
+                    random.uniform(-20, 20),
+                )
+                spawn_y = self.player.rect.bottom if self.player.gravity_dir > 0 else self.player.rect.top
+                self.particles.append(
+                    Particle(self.player.rect.centerx, spawn_y, vel, STATION_BLUE, lifetime=0.35, radius=3)
+                )
+
+        for drone in self.drones:
+            if random.random() < DRONE_SPARK_SPAWN_CHANCE:
+                vel = pygame.Vector2(random.uniform(-30, 30), random.uniform(-30, 30))
+                self.particles.append(
+                    Particle(drone.rect.centerx, drone.rect.centery, vel, WARNING_ORANGE, lifetime=0.3, radius=2)
+                )
+
+        for hazard in self.level.hazard_tiles:
+            if random.random() < STEAM_SPAWN_CHANCE:
+                vel = pygame.Vector2(random.uniform(-10, 10), random.uniform(-45, -20))
+                self.particles.append(
+                    Particle(hazard.rect.centerx, hazard.rect.top, vel, WHITE, lifetime=0.6, radius=4)
+                )
+
+        for particle in self.particles:
+            particle.update(dt)
+        self.particles = [p for p in self.particles if p.alive]
+
     def draw(self, screen):
-        screen.fill(BLACK)
+        screen.blit(self.background, (0, 0))
         for tile in self.level.tiles:
             tile.draw(screen, self.camera.offset)
         for entity in self.drawable:
             entity.draw(screen, self.camera.offset)
+        for particle in self.particles:
+            particle.draw(screen, self.camera.offset)
         hud.draw_oxygen_bar(screen, self.oxygen, MAX_OXYGEN)
