@@ -38,6 +38,9 @@ class Player(Entity):
         self.invulnerable_timer = 0.0
         self._knockback_timer = 0.0
 
+    def flip_gravity(self):
+        self.gravity_dir *= -1
+
     def take_hit(self, source_x):
         if self.invulnerable_timer > 0:
             return
@@ -97,8 +100,7 @@ class Player(Entity):
     def _update_animation(self, dt):
         if self._knockback_timer > 0:
             frame = load_image(FRAMES["hit"])
-            if not self.facing_right:
-                frame = pygame.transform.flip(frame, True, False)
+            frame = pygame.transform.flip(frame, not self.facing_right, self.gravity_dir < 0)
             self.image = frame
             return
 
@@ -113,7 +115,5 @@ class Player(Entity):
         else:
             frame = load_image(FRAMES["stand"])
 
-        if not self.facing_right:
-            frame = pygame.transform.flip(frame, True, False)
-
+        frame = pygame.transform.flip(frame, not self.facing_right, self.gravity_dir < 0)
         self.image = frame

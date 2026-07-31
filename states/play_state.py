@@ -23,6 +23,7 @@ class PlayState(State):
         spawn_x, spawn_y = self.level.player_spawn
         self.player = Player(spawn_x, spawn_y)
         self.drones = [Drone(x, y) for x, y in self.level.drone_spawns]
+        self._touching_flip_zone = False
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
@@ -37,6 +38,7 @@ class PlayState(State):
 
         self.camera.update(self.player.position)
         self._check_hazards()
+        self._check_flip_zones()
 
         # Placeholder until the real win state lands in milestone 6/8.
         if self.level.exit_rect and self.player.rect.colliderect(self.level.exit_rect):
@@ -50,6 +52,14 @@ class PlayState(State):
         for hazard in self.level.hazard_tiles:
             if self.player.rect.colliderect(hazard.rect):
                 self.player.take_hit(hazard.rect.centerx)
+
+    def _check_flip_zones(self):
+        touching = any(
+            self.player.rect.colliderect(zone.rect) for zone in self.level.flip_zone_tiles
+        )
+        if touching and not self._touching_flip_zone:
+            self.player.flip_gravity()
+        self._touching_flip_zone = touching
 
     def draw(self, screen):
         screen.fill(BLACK)
