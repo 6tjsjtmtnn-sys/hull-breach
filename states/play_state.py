@@ -3,6 +3,7 @@ import random
 import pygame
 
 import hud
+import sound
 from constants import (
     BLACK,
     HAZARD_DAMAGE,
@@ -85,6 +86,7 @@ class PlayState(State):
             return
 
         if self.level.exit_rect and self.player.rect.colliderect(self.level.exit_rect):
+            sound.play_success()
             if self.level_index + 1 < len(LEVELS):
                 self.next_state = PlayState(self.game, level_index=self.level_index + 1)
             else:
@@ -114,6 +116,7 @@ class PlayState(State):
             if self.player.rect.colliderect(pickup.rect):
                 self.oxygen = min(MAX_OXYGEN, self.oxygen + OXYGEN_PICKUP_AMOUNT)
                 self.level.tiles.remove(pickup)
+                sound.play_pickup()
 
     def _update_particles(self, dt):
         if not self.player.on_ground or self.player.velocity.x != 0:

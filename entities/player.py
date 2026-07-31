@@ -1,5 +1,6 @@
 import pygame
 
+import sound
 from constants import (
     GRAVITY,
     INVULNERABLE_DURATION,
@@ -49,6 +50,7 @@ class Player(Entity):
         knockback_dir = -1 if source_x > self.position.x else 1
         self.velocity.x = knockback_dir * KNOCKBACK_SPEED
         self.velocity.y = -KNOCKBACK_UP_SPEED * self.gravity_dir
+        sound.play_hit()
         return True
 
     def update(self, dt, solid_tiles):
@@ -97,6 +99,7 @@ class Player(Entity):
         jump_pressed = keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]
         if jump_pressed and self.on_ground:
             self.velocity.y = -JUMP_IMPULSE * self.gravity_dir
+            sound.play_jump()
 
     def _update_animation(self, dt):
         if self._knockback_timer > 0:
