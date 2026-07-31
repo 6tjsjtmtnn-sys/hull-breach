@@ -1,31 +1,11 @@
 import pygame
 
-from constants import BLACK, SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE
+from constants import BLACK, SCREEN_HEIGHT, SCREEN_WIDTH
 from entities.player import Player
-from entities.sprite_loader import load_image
-from levels.tile import Tile
+from levels.camera import Camera
+from levels.data.level_01 import LEVEL
+from levels.level import Level
 from states.base_state import State
-
-GROUND_ROW = SCREEN_HEIGHT // TILE_SIZE - 2
-
-
-def _build_flat_test_level():
-    """Milestone 2 placeholder: a hardcoded flat level with two floating
-    platforms, just to prove out physics/collision before the real
-    data-driven level loader lands in milestone 3."""
-    tile_image = load_image("Ground/Planet/planetMid.png")
-    tiles = []
-
-    columns = SCREEN_WIDTH // TILE_SIZE + 4
-    for col in range(columns):
-        tiles.append(Tile(col * TILE_SIZE, GROUND_ROW * TILE_SIZE, tile_image))
-
-    for col in range(6, 9):
-        tiles.append(Tile(col * TILE_SIZE, (GROUND_ROW - 3) * TILE_SIZE, tile_image))
-    for col in range(14, 18):
-        tiles.append(Tile(col * TILE_SIZE, (GROUND_ROW - 5) * TILE_SIZE, tile_image))
-
-    return tiles
 
 
 class PlayState(State):
@@ -35,8 +15,11 @@ class PlayState(State):
         self.drawable = pygame.sprite.Group()
         Player.containers = (self.updatable, self.drawable)
 
-        self.tiles = _build_flat_test_level()
-        self.player = Player(TILE_SIZE * 2, TILE_SIZE * 2)
+        self.level = Level(LEVEL)
+        self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, self.level.width, self.level.height)
+
+        spawn_x, spawn_y = self.level.player_spawn
+        self.player = Player(spawn_x, spawn_y)
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
@@ -44,12 +27,17 @@ class PlayState(State):
 
     def update(self, dt):
         for entity in self.updatable:
-            entity.update(dt, self.tiles)
+            entity.update(dt, self.level.solid_tiles)
+
+        self.camera.update(self.player.position)
+
+        # Placeholder until the real win state lands in milestone 6/8.
+        if self.level.exit_rect and self.player.rect.colliderect(self.level.exit_rect):
+            print("Level complete!")
 
     def draw(self, screen):
         screen.fill(BLACK)
-        camera_offset = pygame.Vector2(0, 0)
-        for tile in self.tiles:
-            tile.draw(screen, camera_offset)
+        for tile in self.level.tiles:
+            tile.draw(screen, self.camera.offset)
         for entity in self.drawable:
-            entity.draw(screen, camera_offset)
+            entity.draw(screen, self.camera.offset)
