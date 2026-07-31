@@ -6,8 +6,8 @@ from levels.tile import Tile
 
 GROUND_TILE_IMAGE = "Ground/Planet/planetMid.png"
 HAZARD_TILE_IMAGE = "Tiles/spikes.png"
-FLIP_ZONE_TILE_IMAGE = "Tiles/switchBlue.png"
 OXYGEN_PICKUP_IMAGE = "Items/gemBlue.png"
+GRAVITY_PICKUP_IMAGE = "Items/gemGreen.png"
 
 
 class Level:
@@ -44,13 +44,13 @@ class Level:
                     self.exit_rect = pygame.Rect(x, y, self.tile_size, self.tile_size)
                 elif char == "D":
                     self.drone_spawns.append((x, y))
-                elif char == "F":
-                    self.tiles.append(
-                        Tile(x, y, load_image(FLIP_ZONE_TILE_IMAGE), solid=False, flip_zone=True)
-                    )
                 elif char == "O":
                     self.tiles.append(
                         Tile(x, y, load_image(OXYGEN_PICKUP_IMAGE), solid=False, oxygen_pickup=True)
+                    )
+                elif char == "G":
+                    self.tiles.append(
+                        Tile(x, y, load_image(GRAVITY_PICKUP_IMAGE), solid=False, gravity_pickup=True)
                     )
 
     @property
@@ -62,9 +62,9 @@ class Level:
         return [tile for tile in self.tiles if tile.hazard]
 
     @property
-    def flip_zone_tiles(self):
-        return [tile for tile in self.tiles if tile.flip_zone]
-
-    @property
     def oxygen_pickup_tiles(self):
         return [tile for tile in self.tiles if tile.oxygen_pickup]
+
+    @property
+    def gravity_pickup_tiles(self):
+        return [tile for tile in self.tiles if tile.gravity_pickup]

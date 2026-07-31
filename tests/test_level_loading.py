@@ -6,7 +6,7 @@ def test_parses_tiles_and_spawn_points():
         "..E.",
         "....",
         ".D..",
-        "P#^F",
+        "P#^G",
     ]
     level = Level(grid, tile_size=32)
 
@@ -20,8 +20,8 @@ def test_parses_tiles_and_spawn_points():
     hazard_positions = {tile.rect.topleft for tile in level.hazard_tiles}
     assert (2 * 32, 3 * 32) in hazard_positions
 
-    flip_positions = {tile.rect.topleft for tile in level.flip_zone_tiles}
-    assert (3 * 32, 3 * 32) in flip_positions
+    gravity_positions = {tile.rect.topleft for tile in level.gravity_pickup_tiles}
+    assert (3 * 32, 3 * 32) in gravity_positions
 
     assert level.width == 4 * 32
     assert level.height == 4 * 32
@@ -36,3 +36,14 @@ def test_oxygen_pickup_parsed_and_removable():
 
     level.tiles.remove(pickups[0])
     assert level.oxygen_pickup_tiles == []
+
+
+def test_gravity_pickup_parsed_and_removable():
+    grid = ["G"]
+    level = Level(grid, tile_size=32)
+
+    pickups = level.gravity_pickup_tiles
+    assert len(pickups) == 1
+
+    level.tiles.remove(pickups[0])
+    assert level.gravity_pickup_tiles == []

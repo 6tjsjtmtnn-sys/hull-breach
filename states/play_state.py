@@ -6,6 +6,7 @@ import hud
 import sound
 from constants import (
     BLACK,
+    GRAVITY_CHARGE_AMOUNT,
     HAZARD_DAMAGE,
     MAX_OXYGEN,
     OXYGEN_DRAIN_RATE,
@@ -42,7 +43,7 @@ def _build_background():
 
 
 class PlayState(State):
-    def __init__(self, game, level_index=0):
+    def __init__(self, game, level_index=0, gravity_charges=0):
         super().__init__(game)
         self.level_index = level_index
         self.updatable = pygame.sprite.Group()
@@ -57,8 +58,8 @@ class PlayState(State):
         spawn_x, spawn_y = self.level.player_spawn
         self.player = Player(spawn_x, spawn_y)
         self.drones = [Drone(x, y) for x, y in self.level.drone_spawns]
-        self._touching_flip_zone = False
         self.oxygen = MAX_OXYGEN
+        self.gravity_charges = gravity_charges
         self.particles = []
 
     def handle_event(self, event):
@@ -66,6 +67,11 @@ class PlayState(State):
             self.game.running = False
         elif event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_p):
             self.next_state = PauseState(self.game, self)
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+            if self.gravity_charges > 0:
+                self.gravity_charges -= 1
+                self.player.flip_gravity()
+                sound.play_flip()
 
     def update(self, dt):
         for entity in self.updatable:
@@ -76,7 +82,6 @@ class PlayState(State):
 
         self.camera.update(self.player.position)
         self._check_hazards()
-        self._check_flip_zones()
         self._check_pickups()
         self._update_particles(dt)
 
@@ -88,7 +93,11 @@ class PlayState(State):
         if self.level.exit_rect and self.player.rect.colliderect(self.level.exit_rect):
             sound.play_success()
             if self.level_index + 1 < len(LEVELS):
-                self.next_state = PlayState(self.game, level_index=self.level_index + 1)
+                self.next_state = PlayState(
+                    self.game,
+                    level_index=self.level_index + 1,
+                    gravity_charges=self.gravity_charges,
+                )
             else:
                 self.next_state = GameOverState(self.game, won=True)
 
@@ -103,18 +112,16 @@ class PlayState(State):
                 if self.player.take_hit(hazard.rect.centerx):
                     self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
 
-    def _check_flip_zones(self):
-        touching = any(
-            self.player.rect.colliderect(zone.rect) for zone in self.level.flip_zone_tiles
-        )
-        if touching and not self._touching_flip_zone:
-            self.player.flip_gravity()
-        self._touching_flip_zone = touching
-
     def _check_pickups(self):
         for pickup in self.level.oxygen_pickup_tiles:
             if self.player.rect.colliderect(pickup.rect):
                 self.oxygen = min(MAX_OXYGEN, self.oxygen + OXYGEN_PICKUP_AMOUNT)
+                self.level.tiles.remove(pickup)
+                sound.play_pickup()
+
+        for pickup in self.level.gravity_pickup_tiles:
+            if self.player.rect.colliderect(pickup.rect):
+                self.gravity_charges += GRAVITY_CHARGE_AMOUNT
                 self.level.tiles.remove(pickup)
                 sound.play_pickup()
 
@@ -157,3 +164,4 @@ class PlayState(State):
         for particle in self.particles:
             particle.draw(screen, self.camera.offset)
         hud.draw_oxygen_bar(screen, self.oxygen, MAX_OXYGEN)
+        hud.draw_gravity_charges(screen, self.gravity_charges)

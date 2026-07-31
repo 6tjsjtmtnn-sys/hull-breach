@@ -7,12 +7,13 @@ SAMPLE_RATE = 44100
 _cache = {}
 
 
-def _generate_tone(frequency, duration, volume, wave):
+def _generate_tone(frequency, duration, volume, wave, sweep_to=None):
     n_samples = int(SAMPLE_RATE * duration)
     buf = array.array("h")
     for i in range(n_samples):
         t = i / SAMPLE_RATE
-        raw = math.sin(2 * math.pi * frequency * t)
+        freq = frequency if sweep_to is None else frequency + (sweep_to - frequency) * (i / n_samples)
+        raw = math.sin(2 * math.pi * freq * t)
         if wave == "square":
             raw = 1.0 if raw >= 0 else -1.0
         fade = 1.0 - (i / n_samples)
@@ -20,10 +21,12 @@ def _generate_tone(frequency, duration, volume, wave):
     return buf.tobytes()
 
 
-def _play(name, frequency, duration, volume, wave):
+def _play(name, frequency, duration, volume, wave, sweep_to=None):
     if name not in _cache:
         try:
-            _cache[name] = pygame.mixer.Sound(buffer=_generate_tone(frequency, duration, volume, wave))
+            _cache[name] = pygame.mixer.Sound(
+                buffer=_generate_tone(frequency, duration, volume, wave, sweep_to)
+            )
         except pygame.error:
             _cache[name] = None
 
@@ -46,3 +49,7 @@ def play_pickup():
 
 def play_success():
     _play("success", 700, 0.3, volume=0.3, wave="sine")
+
+
+def play_flip():
+    _play("flip", 300, 0.25, volume=0.3, wave="sine", sweep_to=900)

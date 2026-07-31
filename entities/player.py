@@ -3,7 +3,6 @@ import pygame
 import sound
 from constants import (
     GRAVITY,
-    GRAVITY_FLIP_MAX_DURATION,
     INVULNERABLE_DURATION,
     JUMP_IMPULSE,
     KNOCKBACK_SPEED,
@@ -39,16 +38,9 @@ class Player(Entity):
         self._walk_frame = 0
         self.invulnerable_timer = 0.0
         self._knockback_timer = 0.0
-        self._flip_timer = 0.0
 
     def flip_gravity(self):
         self.gravity_dir *= -1
-        # Flipped gravity always auto-reverts after a few seconds, even if
-        # the player never finds a return switch (e.g. drifts off the far
-        # side of a flip-zone platform) — guarantees they can't get
-        # permanently stranded, since falling back to normal gravity
-        # anywhere eventually lands them on the level's ground floor.
-        self._flip_timer = GRAVITY_FLIP_MAX_DURATION if self.gravity_dir < 0 else 0.0
 
     def take_hit(self, source_x):
         if self.invulnerable_timer > 0:
@@ -64,11 +56,6 @@ class Player(Entity):
     def update(self, dt, solid_tiles):
         self.invulnerable_timer = max(0.0, self.invulnerable_timer - dt)
         self._knockback_timer = max(0.0, self._knockback_timer - dt)
-
-        if self.gravity_dir < 0:
-            self._flip_timer -= dt
-            if self._flip_timer <= 0:
-                self.flip_gravity()
 
         self._handle_input()
 

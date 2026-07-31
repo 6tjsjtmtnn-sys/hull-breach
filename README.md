@@ -11,10 +11,10 @@ This is my Boot.dev capstone project.
 
 - **Low-gravity movement.** Jumps are floatier than a standard platformer,
   matching the station setting.
-- **Gravity-flip mechanic.** Certain switches flip which way is "down,"
-  turning the ceiling into the floor for a section of the level. It's
-  scoped to a discoverable optional puzzle pocket in level 1 — you don't
-  have to find it to finish the game, but it's there to explore.
+- **Player-controlled gravity flip.** Collect a green gravity diamond to
+  gain a flip charge, then press `G` any time to flip which way is "down."
+  Charges carry over between levels — spend them whenever you want, and
+  find more diamonds to keep the ability topped up.
 - **Oxygen as both a timer and a health bar.** It drains continuously (the
   "get out before you run out of air" pressure) and drops further on
   contact with drones or hazards. Oxygen pickups scattered through the
@@ -41,7 +41,7 @@ install step needed.
 | Move left / right       | `A` / `D` or arrow keys |
 | Jump                     | `Space`, `W`, or Up arrow |
 | Pause / resume           | `Esc` or `P`          |
-| Flip gravity             | Walk into a blue switch tile |
+| Flip gravity (needs a charge) | `G`             |
 
 ## Running the tests
 
@@ -81,13 +81,14 @@ turn into duplicated code paths.
 
 Level design turned out to be its own source of bugs, independent of the
 physics code being correct. Writing a small scripted "bot" that plays
-through a level headlessly (hold right, jump over walls/gaps) caught two
-real level-design mistakes that would have been invisible from reading the
-code: a switch placed in the normal walking path's head-space that
-launched the player into an unbounded fall, and a return switch positioned
-outside the footprint the player actually lands in after a jump. Both are
-the kind of bug that's obvious the moment you watch it happen and easy to
-miss otherwise.
+through a level headlessly (hold right, jump over walls/gaps) caught real
+level-design mistakes that would have been invisible from reading the
+code alone — things like a trigger placed in the normal walking path's
+head-space that launched the player into an unbounded fall, since the
+level had no top boundary either. That's the kind of bug that's obvious
+the moment you watch it happen and easy to miss otherwise. (The original
+switch-tile version of the gravity flip that story refers to was later
+replaced with the player-controlled charge system described above.)
 
 ## Credits
 
