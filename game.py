@@ -1,7 +1,7 @@
 import pygame
 
 from constants import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE
-from states.play_state import PlayState
+from states.menu_state import MenuState
 
 
 class Game:
@@ -11,7 +11,7 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
         self.running = True
-        self.state = PlayState(self)
+        self.state = MenuState(self)
 
     def run(self):
         while self.running:

@@ -19,10 +19,11 @@ from entities.drone import Drone
 from entities.particle import Particle
 from entities.player import Player
 from levels.camera import Camera
-from levels.data.level_01 import LEVEL
 from levels.level import Level
+from levels.registry import LEVELS
 from states.base_state import State
 from states.game_over_state import GameOverState
+from states.pause_state import PauseState
 
 BACKGROUND_TOP = (16, 20, 34)
 THRUSTER_SPAWN_CHANCE = 0.6
@@ -40,14 +41,15 @@ def _build_background():
 
 
 class PlayState(State):
-    def __init__(self, game):
+    def __init__(self, game, level_index=0):
         super().__init__(game)
+        self.level_index = level_index
         self.updatable = pygame.sprite.Group()
         self.drawable = pygame.sprite.Group()
         Player.containers = (self.updatable, self.drawable)
         Drone.containers = (self.updatable, self.drawable)
 
-        self.level = Level(LEVEL)
+        self.level = Level(LEVELS[level_index])
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, self.level.width, self.level.height)
         self.background = _build_background()
 
@@ -61,6 +63,8 @@ class PlayState(State):
     def handle_event(self, event):
         if event.type == pygame.QUIT:
             self.game.running = False
+        elif event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_p):
+            self.next_state = PauseState(self.game, self)
 
     def update(self, dt):
         for entity in self.updatable:
@@ -81,7 +85,10 @@ class PlayState(State):
             return
 
         if self.level.exit_rect and self.player.rect.colliderect(self.level.exit_rect):
-            self.next_state = GameOverState(self.game, won=True)
+            if self.level_index + 1 < len(LEVELS):
+                self.next_state = PlayState(self.game, level_index=self.level_index + 1)
+            else:
+                self.next_state = GameOverState(self.game, won=True)
 
     def _check_hazards(self):
         for drone in self.drones:
