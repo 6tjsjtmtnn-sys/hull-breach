@@ -1,3 +1,6 @@
+import pygame
+
+
 def resolve_axis_collision(rect, velocity, solid_tiles, axis):
     """Clamp `rect` out of any overlapping solid tile along a single axis.
 
@@ -45,5 +48,16 @@ def check_grounded(rect, solid_tiles, gravity_dir, probe_distance=1):
     probe = rect.copy()
     probe.y += probe_distance if gravity_dir > 0 else -probe_distance
     return any(
+        probe.colliderect(tile.rect) for tile in solid_tiles if tile.solid
+    )
+
+
+def is_ledge_ahead(rect, solid_tiles, direction, gravity_dir, tile_size):
+    """No ground just past the leading edge in `direction`? Used by patrol
+    AI so it turns around at a platform's edge instead of walking off."""
+    probe_x = rect.right if direction > 0 else rect.left - tile_size
+    probe_y = rect.bottom if gravity_dir > 0 else rect.top - 4
+    probe = pygame.Rect(probe_x, probe_y, tile_size, 4)
+    return not any(
         probe.colliderect(tile.rect) for tile in solid_tiles if tile.solid
     )

@@ -1,15 +1,25 @@
 import pygame
 
-from constants import GRAVITY, JUMP_IMPULSE, MAX_FALL_SPEED, MOVE_SPEED
+from constants import (
+    GRAVITY,
+    INVULNERABLE_DURATION,
+    JUMP_IMPULSE,
+    KNOCKBACK_SPEED,
+    KNOCKBACK_UP_SPEED,
+    MAX_FALL_SPEED,
+    MOVE_SPEED,
+)
 from entities.entity import Entity
 from entities.sprite_loader import load_image
 from levels.collision import check_grounded, resolve_axis_collision
 
 WALK_FRAME_DURATION = 0.12
+KNOCKBACK_LOCK_DURATION = 0.15
 
 FRAMES = {
     "stand": "Players/128x256/Blue/alienBlue_stand.png",
     "jump": "Players/128x256/Blue/alienBlue_jump.png",
+    "hit": "Players/128x256/Blue/alienBlue_hit.png",
     "walk": [
         "Players/128x256/Blue/alienBlue_walk1.png",
         "Players/128x256/Blue/alienBlue_walk2.png",
@@ -25,8 +35,22 @@ class Player(Entity):
         self.facing_right = True
         self._walk_timer = 0.0
         self._walk_frame = 0
+        self.invulnerable_timer = 0.0
+        self._knockback_timer = 0.0
+
+    def take_hit(self, source_x):
+        if self.invulnerable_timer > 0:
+            return
+        self.invulnerable_timer = INVULNERABLE_DURATION
+        self._knockback_timer = KNOCKBACK_LOCK_DURATION
+        knockback_dir = -1 if source_x > self.position.x else 1
+        self.velocity.x = knockback_dir * KNOCKBACK_SPEED
+        self.velocity.y = -KNOCKBACK_UP_SPEED * self.gravity_dir
 
     def update(self, dt, solid_tiles):
+        self.invulnerable_timer = max(0.0, self.invulnerable_timer - dt)
+        self._knockback_timer = max(0.0, self._knockback_timer - dt)
+
         self._handle_input()
 
         self.velocity.y += GRAVITY * self.gravity_dir * dt
@@ -53,6 +77,9 @@ class Player(Entity):
         self._update_animation(dt)
 
     def _handle_input(self):
+        if self._knockback_timer > 0:
+            return
+
         keys = pygame.key.get_pressed()
         direction = 0
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -68,6 +95,13 @@ class Player(Entity):
             self.velocity.y = -JUMP_IMPULSE * self.gravity_dir
 
     def _update_animation(self, dt):
+        if self._knockback_timer > 0:
+            frame = load_image(FRAMES["hit"])
+            if not self.facing_right:
+                frame = pygame.transform.flip(frame, True, False)
+            self.image = frame
+            return
+
         if not self.on_ground:
             frame = load_image(FRAMES["jump"])
         elif self.velocity.x != 0:
