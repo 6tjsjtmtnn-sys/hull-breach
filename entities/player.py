@@ -43,12 +43,13 @@ class Player(Entity):
 
     def take_hit(self, source_x):
         if self.invulnerable_timer > 0:
-            return
+            return False
         self.invulnerable_timer = INVULNERABLE_DURATION
         self._knockback_timer = KNOCKBACK_LOCK_DURATION
         knockback_dir = -1 if source_x > self.position.x else 1
         self.velocity.x = knockback_dir * KNOCKBACK_SPEED
         self.velocity.y = -KNOCKBACK_UP_SPEED * self.gravity_dir
+        return True
 
     def update(self, dt, solid_tiles):
         self.invulnerable_timer = max(0.0, self.invulnerable_timer - dt)

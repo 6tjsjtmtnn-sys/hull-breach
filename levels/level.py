@@ -7,15 +7,12 @@ from levels.tile import Tile
 GROUND_TILE_IMAGE = "Ground/Planet/planetMid.png"
 HAZARD_TILE_IMAGE = "Tiles/spikes.png"
 FLIP_ZONE_TILE_IMAGE = "Tiles/switchBlue.png"
+OXYGEN_PICKUP_IMAGE = "Items/gemBlue.png"
 
 
 class Level:
     """Parses a grid of characters (see levels/data/level_01.py for the
-    legend) into tiles and spawn points.
-
-    'O' (oxygen pickup) is recognized and captured now so milestone 6 can
-    consume it without touching this parser again.
-    """
+    legend) into tiles and spawn points."""
 
     def __init__(self, grid, tile_size=TILE_SIZE):
         self.tile_size = tile_size
@@ -23,7 +20,6 @@ class Level:
         self.player_spawn = (0, 0)
         self.exit_rect = None
         self.drone_spawns = []
-        self.oxygen_pickup_positions = []
 
         self.width = max(len(row) for row in grid) * tile_size
         self.height = len(grid) * tile_size
@@ -53,7 +49,9 @@ class Level:
                         Tile(x, y, load_image(FLIP_ZONE_TILE_IMAGE), solid=False, flip_zone=True)
                     )
                 elif char == "O":
-                    self.oxygen_pickup_positions.append((x, y))
+                    self.tiles.append(
+                        Tile(x, y, load_image(OXYGEN_PICKUP_IMAGE), solid=False, oxygen_pickup=True)
+                    )
 
     @property
     def solid_tiles(self):
@@ -66,3 +64,7 @@ class Level:
     @property
     def flip_zone_tiles(self):
         return [tile for tile in self.tiles if tile.flip_zone]
+
+    @property
+    def oxygen_pickup_tiles(self):
+        return [tile for tile in self.tiles if tile.oxygen_pickup]
