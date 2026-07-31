@@ -1,0 +1,13 @@
+[project]
+name = "hull-breach"
+version = "0.1.0"
+description = "2D platformer: escape a failing space station before you run out of air."
+requires-python = ">=3.13"
+dependencies = [
+    "pygame==2.6.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
