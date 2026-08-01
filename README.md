@@ -36,6 +36,9 @@ install step needed.
 
 ## Controls
 
+The main menu has `[C] Controls` and `[R] Rules` screens in-game. Quick
+reference:
+
 | Action                | Keys                  |
 |------------------------|-----------------------|
 | Move left / right       | `A` / `D` or arrow keys |

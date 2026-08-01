@@ -8,6 +8,7 @@ GROUND_TILE_IMAGE = "Ground/Planet/planetMid.png"
 HAZARD_TILE_IMAGE = "Tiles/spikes.png"
 OXYGEN_PICKUP_IMAGE = "Items/gemBlue.png"
 GRAVITY_PICKUP_IMAGE = "Items/gemGreen.png"
+EXIT_IMAGE = "Tiles/signExit.png"
 
 
 class Level:
@@ -41,7 +42,9 @@ class Level:
                 elif char == "P":
                     self.player_spawn = (x, y)
                 elif char == "E":
-                    self.exit_rect = pygame.Rect(x, y, self.tile_size, self.tile_size)
+                    exit_tile = Tile(x, y, load_image(EXIT_IMAGE), solid=False, exit_marker=True)
+                    self.tiles.append(exit_tile)
+                    self.exit_rect = exit_tile.rect
                 elif char == "D":
                     self.drone_spawns.append((x, y))
                 elif char == "O":

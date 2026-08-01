@@ -165,3 +165,5 @@ class PlayState(State):
             particle.draw(screen, self.camera.offset)
         hud.draw_oxygen_bar(screen, self.oxygen, MAX_OXYGEN)
         hud.draw_gravity_charges(screen, self.gravity_charges)
+        if self.level.exit_rect:
+            hud.draw_exit_indicator(screen, self.level.exit_rect, self.camera.offset)

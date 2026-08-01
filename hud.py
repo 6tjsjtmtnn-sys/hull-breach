@@ -1,6 +1,6 @@
 import pygame
 
-from constants import GRAVITY_PURPLE, WHITE
+from constants import GRAVITY_PURPLE, SCREEN_WIDTH, WHITE
 
 BAR_WIDTH = 220
 BAR_HEIGHT = 22
@@ -11,6 +11,11 @@ CRITICAL_COLOR = (200, 40, 40)
 
 GRAVITY_ICON_SIZE = 16
 GRAVITY_HUD_Y = BAR_MARGIN + BAR_HEIGHT + 10
+
+EXIT_ARROW_COLOR = (240, 200, 60)
+EXIT_ARROW_Y = 90
+EXIT_ARROW_MARGIN = 24
+EXIT_ARROW_SIZE = 14
 
 _font = None
 
@@ -50,3 +55,28 @@ def draw_gravity_charges(screen, charges):
 
     text = _get_font().render(f"x {charges}  [G]", True, WHITE)
     screen.blit(text, (x + size + 8, y - 3))
+
+
+def draw_exit_indicator(screen, exit_rect, camera_offset):
+    """A screen-edge arrow pointing toward the exit whenever it has
+    scrolled out of view, so players always know which way to head."""
+    exit_screen_x = exit_rect.centerx - camera_offset.x
+
+    if exit_screen_x < 0:
+        _draw_exit_arrow(screen, EXIT_ARROW_MARGIN, pointing_left=True)
+    elif exit_screen_x > SCREEN_WIDTH:
+        _draw_exit_arrow(screen, SCREEN_WIDTH - EXIT_ARROW_MARGIN, pointing_left=False)
+
+
+def _draw_exit_arrow(screen, x, pointing_left):
+    y = EXIT_ARROW_Y
+    size = EXIT_ARROW_SIZE
+    if pointing_left:
+        points = [(x, y), (x + size, y - size), (x + size, y + size)]
+    else:
+        points = [(x, y), (x - size, y - size), (x - size, y + size)]
+
+    pygame.draw.polygon(screen, EXIT_ARROW_COLOR, points)
+
+    text = _get_font().render("EXIT", True, EXIT_ARROW_COLOR)
+    screen.blit(text, (x - text.get_width() // 2, y + size + 4))
