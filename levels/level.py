@@ -33,6 +33,15 @@ class Level:
 
         self._parse(grid)
 
+    def _exit_trigger_rect(self, x):
+        """A full-height sensor column at the exit sign's x, not just its
+        own 32px tile — a jump or bounce that carries a player over the
+        single-tile-tall sign at speed could otherwise sail past it
+        without ever overlapping its rect, stranding them against the
+        level boundary with no way back (hit this in testing more than
+        once)."""
+        return pygame.Rect(x, 0, self.tile_size, self.height)
+
     def _parse(self, grid):
         for row_index, row in enumerate(grid):
             for col_index, char in enumerate(row):
@@ -50,13 +59,13 @@ class Level:
                 elif char == "E":
                     exit_tile = Tile(x, y, load_image(EXIT_IMAGE), solid=False, exit_marker=True)
                     self.tiles.append(exit_tile)
-                    self.exit_rect = exit_tile.rect
+                    self.exit_rect = self._exit_trigger_rect(x)
                 elif char == "X":
                     exit_tile = Tile(
                         x, y, load_image(BLANK_SIGN_IMAGE), solid=False, exit_marker=True, label="BOSS FIGHT"
                     )
                     self.tiles.append(exit_tile)
-                    self.exit_rect = exit_tile.rect
+                    self.exit_rect = self._exit_trigger_rect(x)
                     self.exit_label = "BOSS FIGHT"
                 elif char == "D":
                     self.drone_spawns.append((x, y))

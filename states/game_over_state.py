@@ -12,7 +12,7 @@ class GameOverState(State):
         self.won = won
 
         music.stop()
-        sound.play_success() if won else sound.play_lose()
+        sound.play_victory() if won else sound.play_lose()
 
         title_font = pygame.font.SysFont(None, 48)
         body_font = pygame.font.SysFont(None, 28)
@@ -24,12 +24,12 @@ class GameOverState(State):
 
         self.title_surface = title_font.render(title, True, WHITE)
         self.subtitle_surface = body_font.render(subtitle, True, WHITE)
-        self.prompt_surface = body_font.render("Press any key to try again", True, WHITE)
+        self.prompt_surface = body_font.render("Press Enter or Space to try again", True, WHITE)
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
             self.game.running = False
-        elif event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
             from states.play_state import PlayState
 
             self.next_state = PlayState(self.game)

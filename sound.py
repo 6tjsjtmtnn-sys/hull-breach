@@ -21,12 +21,42 @@ def _generate_tone(frequency, duration, volume, wave, sweep_to=None):
     return buf.tobytes()
 
 
+def _generate_melody(notes, volume, wave):
+    """notes is a list of (frequency_or_chord, duration) — a chord is a
+    list of frequencies summed together, for a fuller final note."""
+    buf = array.array("h")
+    for freqs, duration in notes:
+        if isinstance(freqs, (int, float)):
+            freqs = [freqs]
+        n_samples = int(SAMPLE_RATE * duration)
+        for i in range(n_samples):
+            t = i / SAMPLE_RATE
+            raw = sum(math.sin(2 * math.pi * f * t) for f in freqs) / len(freqs)
+            if wave == "square":
+                raw = 1.0 if raw >= 0 else -1.0
+            fade = 1.0 - (i / n_samples) * 0.8
+            buf.append(int(max(-1.0, min(1.0, raw)) * volume * fade * 32767))
+    return buf.tobytes()
+
+
 def _play(name, frequency, duration, volume, wave, sweep_to=None):
     if name not in _cache:
         try:
             _cache[name] = pygame.mixer.Sound(
                 buffer=_generate_tone(frequency, duration, volume, wave, sweep_to)
             )
+        except pygame.error:
+            _cache[name] = None
+
+    sound = _cache[name]
+    if sound is not None:
+        sound.play()
+
+
+def _play_melody(name, notes, volume, wave):
+    if name not in _cache:
+        try:
+            _cache[name] = pygame.mixer.Sound(buffer=_generate_melody(notes, volume, wave))
         except pygame.error:
             _cache[name] = None
 
@@ -49,6 +79,18 @@ def play_pickup():
 
 def play_success():
     _play("success", 700, 0.3, volume=0.3, wave="sine")
+
+
+def play_victory():
+    """The final-win fanfare — a rising major arpeggio into a held chord,
+    distinct from the small per-level completion chime."""
+    notes = [
+        (523.25, 0.1),  # C5
+        (659.25, 0.1),  # E5
+        (783.99, 0.1),  # G5
+        ([1046.50, 1318.51, 1567.98], 0.45),  # C6 major chord, held
+    ]
+    _play_melody("victory", notes, volume=0.32, wave="sine")
 
 
 def play_flip():
