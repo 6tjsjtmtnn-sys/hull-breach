@@ -27,13 +27,16 @@ This is my Boot.dev capstone project.
   Touch one from the side and it hurts you instead. Ground drones patrol
   platforms; flying drones patrol a fixed path near the ceiling and take
   potshots at you with projectiles when you're in range. Spike hazards
-  show up on elevated platforms too, not just the ground.
+  show up on elevated platforms and hanging from the ceiling too, not
+  just the ground — the ceiling ones mainly matter if you flip gravity
+  and end up walking up there.
 - **9 levels that ramp up**, then a final boss. Oxygen drains faster and
   enemy/hazard density increases each level; the 10th level drops the
   oxygen timer entirely for a 3-heart fight against the station's Reactor
   Sentinel, a scaled-up saw drone that also shoots back — stomp it 10
   times to win, its own health bar tracking the fight, different music,
-  no clock ticking. Winning or losing (any level) stops the music and
+  no clock ticking. Each stomp stuns it briefly, giving you a breather
+  before it's back on your tail. Winning or losing (any level) stops the music and
   plays a distinct win/lose sting. Since there's no other way to recover
   a lost heart during the fight, a bonus heart pickup appears at a random
   spot every so often (only while you're missing one) and vanishes again

@@ -47,6 +47,9 @@ def draw_oxygen_bar(screen, oxygen, max_oxygen):
     pygame.draw.rect(screen, _color_for_ratio(ratio), (x, y, int(BAR_WIDTH * ratio), BAR_HEIGHT))
     pygame.draw.rect(screen, WHITE, (x, y, BAR_WIDTH, BAR_HEIGHT), width=2)
 
+    label = _get_font().render("O2", True, WHITE)
+    screen.blit(label, (x + 6, y + BAR_HEIGHT // 2 - label.get_height() // 2))
+
 
 def _color_for_ratio(ratio):
     if ratio > 0.5:

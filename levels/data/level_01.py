@@ -2,13 +2,14 @@
 
 Grid legend:
   '#' solid wall/platform    'P' player spawn       'E' level exit
-  '^' hazard (spikes)        'D' ground drone spawn  'G' gravity-flip diamond
-  'O' oxygen pickup          'F' flying drone spawn  '.' empty space
+  '^' hazard (spikes, up)    'D' ground drone spawn  'G' gravity-flip diamond
+  'v' hazard (spikes, down)  'F' flying drone spawn  '.' empty space
+  'O' oxygen pickup
 """
 
 LEVEL = [
     "############################################################",
-    "#..........................................................#",
+    "#...................v...................v..................#",
     "#..........................................................#",
     "#..........................................................#",
     "#.............................F............................#",

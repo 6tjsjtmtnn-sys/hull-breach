@@ -11,6 +11,17 @@ GRAVITY_PICKUP_IMAGE = "Items/gemGreen.png"
 EXIT_IMAGE = "Tiles/signExit.png"
 BLANK_SIGN_IMAGE = "Tiles/sign.png"
 
+_ceiling_hazard_image = None
+
+
+def _load_ceiling_hazard_image():
+    """The spike sprite points up (floor placement) — flip it once and
+    cache it for ceiling spikes, which hang down instead."""
+    global _ceiling_hazard_image
+    if _ceiling_hazard_image is None:
+        _ceiling_hazard_image = pygame.transform.flip(load_image(HAZARD_TILE_IMAGE), False, True)
+    return _ceiling_hazard_image
+
 
 class Level:
     """Parses a grid of characters (see levels/data/level_01.py for the
@@ -53,6 +64,10 @@ class Level:
                 elif char == "^":
                     self.tiles.append(
                         Tile(x, y, load_image(HAZARD_TILE_IMAGE), solid=False, hazard=True)
+                    )
+                elif char == "v":
+                    self.tiles.append(
+                        Tile(x, y, _load_ceiling_hazard_image(), solid=False, hazard=True)
                     )
                 elif char == "P":
                     self.player_spawn = (x, y)

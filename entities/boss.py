@@ -9,6 +9,7 @@ from constants import (
     BOSS_LOSE_RANGE,
     BOSS_PATROL_SPEED,
     BOSS_SCALE,
+    BOSS_STUN_DURATION,
     CHASE_DEADZONE,
     GRAVITY,
     MAX_FALL_SPEED,
@@ -21,7 +22,6 @@ from levels.collision import check_grounded, is_ledge_ahead, resolve_axis_collis
 
 FRAMES = ["Enemies/saw.png", "Enemies/saw_move.png"]
 ANIM_FRAME_DURATION = 0.07
-HURT_FLASH_DURATION = 0.2
 
 
 class Boss(Entity):
@@ -36,12 +36,14 @@ class Boss(Entity):
         self.state = "patrol"
         self._anim_timer = 0.0
         self._anim_frame = 0
-        self._hurt_timer = 0.0
+        self._stun_timer = 0.0
         self._fire_cooldown = BOSS_FIRE_COOLDOWN
 
     def try_fire(self, player):
         """Returns a new Projectile aimed at the player if off cooldown
         and in range, otherwise None."""
+        if self._stun_timer > 0:
+            return None
         if self._fire_cooldown > 0:
             return None
         if self.position.distance_to(player.position) > BOSS_FIRE_RANGE:
@@ -54,12 +56,12 @@ class Boss(Entity):
 
     def take_hit(self):
         self.hp -= 1
-        self._hurt_timer = HURT_FLASH_DURATION
+        self._stun_timer = BOSS_STUN_DURATION
         return self.hp <= 0
 
     def update(self, dt, solid_tiles, player):
-        self._hurt_timer = max(0.0, self._hurt_timer - dt)
         self._fire_cooldown = max(0.0, self._fire_cooldown - dt)
+        self._stun_timer = max(0.0, self._stun_timer - dt)
 
         distance = self.position.distance_to(player.position)
         if self.state == "patrol" and distance < BOSS_DETECT_RANGE:
@@ -67,7 +69,9 @@ class Boss(Entity):
         elif self.state == "chase" and distance > BOSS_LOSE_RANGE:
             self.state = "patrol"
 
-        if self.state == "chase":
+        if self._stun_timer > 0:
+            self.velocity.x = 0
+        elif self.state == "chase":
             dx = player.position.x - self.position.x
             if abs(dx) > CHASE_DEADZONE:
                 self.direction = 1 if dx > 0 else -1
@@ -93,15 +97,17 @@ class Boss(Entity):
         if on_ground and self.velocity.y >= 0:
             self.velocity.y = 0
 
-        hit_wall = self.velocity.x == 0
-        ledge_ahead = on_ground and is_ledge_ahead(
-            self.rect, solid_tiles, self.direction, 1, TILE_SIZE
-        )
-        if hit_wall or ledge_ahead:
-            self.direction *= -1
+        if self._stun_timer <= 0:
+            hit_wall = self.velocity.x == 0
+            ledge_ahead = on_ground and is_ledge_ahead(
+                self.rect, solid_tiles, self.direction, 1, TILE_SIZE
+            )
+            if hit_wall or ledge_ahead:
+                self.direction *= -1
 
         self.position.update(self.rect.topleft)
-        self._update_animation(dt)
+        if self._stun_timer <= 0:
+            self._update_animation(dt)
 
     def _update_animation(self, dt):
         self._anim_timer += dt
@@ -111,7 +117,7 @@ class Boss(Entity):
         self.image = load_image_scaled(FRAMES[self._anim_frame], BOSS_SCALE)
 
     def draw(self, screen, camera_offset):
-        if self._hurt_timer > 0:
+        if self._stun_timer > 0:
             flash = self.image.copy()
             flash.fill((255, 255, 255, 140), special_flags=pygame.BLEND_RGBA_ADD)
             screen.blit(flash, self.rect.topleft - camera_offset)
