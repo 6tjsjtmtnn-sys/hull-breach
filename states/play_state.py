@@ -150,6 +150,17 @@ class PlayState(State):
                     title="REACTOR BREACH",
                     subtitle="The sentinel overwhelmed you.",
                 )
+                return
+            if (
+                self.boss is None
+                and self.level.exit_rect
+                and self.player.rect.colliderect(self.level.exit_rect)
+            ):
+                self.next_state = GameOverState(
+                    self.game,
+                    won=True,
+                    subtitle="You disabled the Reactor Sentinel and escaped.",
+                )
             return
 
         self.oxygen = max(0.0, self.oxygen - self.oxygen_drain_rate * dt)
@@ -199,11 +210,10 @@ class PlayState(State):
             if defeated:
                 self.boss.kill()
                 self.boss = None
-                self.next_state = GameOverState(
-                    self.game,
-                    won=True,
-                    subtitle="You disabled the Reactor Sentinel and escaped.",
-                )
+                # Winning now happens by reaching the exit sign, not on
+                # this hit directly — matches the level's own premise
+                # (the sentinel guards the escape pod) and gives the exit
+                # sign an actual purpose instead of being decorative.
         elif self.player.take_hit(self.boss.rect.centerx):
             self._apply_hit_damage()
 
@@ -325,7 +335,7 @@ class PlayState(State):
 
     def _update_projectiles(self, dt):
         for enemy in self.enemies:
-            if isinstance(enemy, FlyingDrone):
+            if isinstance(enemy, (FlyingDrone, SweepDrone)):
                 projectile = enemy.try_fire(self.player)
                 if projectile is not None:
                     self.projectiles.append(projectile)
@@ -397,6 +407,8 @@ class PlayState(State):
             hud.draw_player_hearts(screen, self.hearts, PLAYER_HEARTS)
             if self.boss is not None:
                 hud.draw_boss_health_bar(screen, self.boss.hp, BOSS_HP)
+            else:
+                hud.draw_escape_prompt(screen)
         else:
             hud.draw_oxygen_bar(screen, self.oxygen, MAX_OXYGEN)
 

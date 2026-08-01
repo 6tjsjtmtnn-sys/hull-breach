@@ -1,6 +1,6 @@
 """Level 10: the reactor core — the station's malfunctioning sentinel
-guards the escape pod. No oxygen timer here; defeat the boss (3 stomps)
-to win, or run out of hearts and it's over.
+guards the escape pod. No oxygen timer here; defeat the boss (10 stomps),
+then reach the exit sign to escape, or run out of hearts and it's over.
 
 Grid legend: same as level_01, plus 'B' boss spawn.
 """

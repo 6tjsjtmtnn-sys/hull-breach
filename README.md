@@ -34,12 +34,16 @@ This is my Boot.dev capstone project.
   enemy/hazard density increases each level; the 10th level drops the
   oxygen timer entirely for a 3-heart fight against the station's Reactor
   Sentinel, a scaled-up saw drone that also shoots back — stomp it 10
-  times to win, its own health bar tracking the fight, different music,
-  no clock ticking. Each stomp stuns it briefly, giving you a breather
-  before it's back on your tail. Winning or losing (any level) stops the music and
-  plays a distinct win/lose sting. Since there's no other way to recover
-  a lost heart during the fight, a bonus heart pickup appears at a random
-  spot every so often (only while you're missing one) and vanishes again
+  times to disable it, its own health bar tracking the fight, different
+  music, no clock ticking. Each stomp stuns it briefly, giving you a
+  breather before it's back on your tail. A flying drone also sweeps
+  across the screen every so often, taking shots of its own along the
+  way. Disabling the sentinel doesn't end the fight by itself — you
+  still have to reach the exit sign to actually escape. Winning or
+  losing (any level) stops the music and plays a distinct win/lose
+  sting. Since there's no other way to recover a lost heart during the
+  fight, a bonus heart pickup appears at a random spot every so often
+  (only while you're missing one) and vanishes again
   if you don't reach it in time.
 
 ## How to run it

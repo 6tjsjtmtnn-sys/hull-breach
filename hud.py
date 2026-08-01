@@ -133,3 +133,17 @@ def draw_boss_health_bar(screen, hp, max_hp):
 
     text = _get_font().render("REACTOR SENTINEL", True, WHITE)
     screen.blit(text, (x + BOSS_BAR_WIDTH // 2 - text.get_width() // 2, y + BOSS_BAR_HEIGHT + 4))
+
+
+def draw_escape_prompt(screen):
+    text = _get_font().render("REACTOR DISABLED — GET TO THE EXIT", True, GRAVITY_GREEN)
+    x = SCREEN_WIDTH // 2 - text.get_width() // 2
+    y = BOSS_BAR_Y
+
+    padding = 6
+    backing = pygame.Rect(
+        x - padding, y - padding // 2, text.get_width() + padding * 2, text.get_height() + padding
+    )
+    pygame.draw.rect(screen, BACKGROUND_COLOR, backing)
+    pygame.draw.rect(screen, GRAVITY_GREEN, backing, width=2)
+    screen.blit(text, (x, y))
