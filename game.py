@@ -26,6 +26,13 @@ class Game:
             pygame.display.flip()
 
             if self.state.next_state is not None:
-                self.state = self.state.next_state
+                next_state = self.state.next_state
+                # Clear it on the outgoing state before switching — a
+                # resumed/reused state instance (e.g. PlayState after
+                # PauseState hands control back) would otherwise still
+                # carry the old transition and immediately bounce right
+                # back to it next frame.
+                self.state.next_state = None
+                self.state = next_state
 
         pygame.quit()

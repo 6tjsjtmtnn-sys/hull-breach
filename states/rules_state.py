@@ -1,16 +1,17 @@
 import pygame
 
-from constants import BLACK, SCREEN_HEIGHT, SCREEN_WIDTH, WHITE
+from constants import BLACK, BOSS_HP, PLAYER_HEARTS, SCREEN_HEIGHT, SCREEN_WIDTH, WHITE
 from states.base_state import State
 
 RULES = [
     "Reach the exit sign on each level to move on to the next.",
     "Your oxygen drains over time - refill it with blue oxygen pickups.",
     "Touching spikes or a drone from the side costs oxygen and knocks you back.",
-    "Land on top of a drone instead and you defeat it.",
-    "Collect green diamonds for a gravity-flip charge, then press G to flip.",
+    "Land on top of a drone instead and you defeat it. Flying drones shoot back.",
+    "Collect green diamonds for a gravity-flip charge, then press G to flip -",
+    "  flipping back to normal gravity is always free.",
     "Run out of oxygen and it's game over.",
-    "Level 10: no oxygen timer - defeat the boss with 3 stomps before it costs you 3 hearts.",
+    f"Level 10: no oxygen timer - stomp the boss {BOSS_HP} times before it costs you all {PLAYER_HEARTS} hearts.",
 ]
 
 
@@ -37,10 +38,10 @@ class RulesState(State):
         center_x = SCREEN_WIDTH // 2
         screen.blit(self.title_surface, self.title_surface.get_rect(center=(center_x, 90)))
 
-        y = 170
+        y = 150
         for line in self.lines:
             screen.blit(line, (center_x - 320, y))
-            y += 42
+            y += 40
 
         screen.blit(
             self.prompt_surface, self.prompt_surface.get_rect(center=(center_x, SCREEN_HEIGHT - 60))

@@ -61,3 +61,7 @@ def play_defeat():
 
 def play_boss_hit():
     _play("boss_hit", 200, 0.2, volume=0.35, wave="square", sweep_to=80)
+
+
+def play_shoot():
+    _play("shoot", 500, 0.07, volume=0.2, wave="square", sweep_to=1000)

@@ -9,17 +9,21 @@ HAZARD_TILE_IMAGE = "Tiles/spikes.png"
 OXYGEN_PICKUP_IMAGE = "Items/gemBlue.png"
 GRAVITY_PICKUP_IMAGE = "Items/gemGreen.png"
 EXIT_IMAGE = "Tiles/signExit.png"
+BLANK_SIGN_IMAGE = "Tiles/sign.png"
 
 
 class Level:
     """Parses a grid of characters (see levels/data/level_01.py for the
-    legend) into tiles and spawn points."""
+    legend) into tiles and spawn points. 'X' is the same as 'E' but
+    labeled "BOSS FIGHT" instead of "EXIT" — used on the level right
+    before a boss encounter."""
 
     def __init__(self, grid, tile_size=TILE_SIZE):
         self.tile_size = tile_size
         self.tiles = []
         self.player_spawn = (0, 0)
         self.exit_rect = None
+        self.exit_label = "EXIT"
         self.drone_spawns = []
         self.flying_drone_spawns = []
         self.boss_spawn = None
@@ -47,6 +51,13 @@ class Level:
                     exit_tile = Tile(x, y, load_image(EXIT_IMAGE), solid=False, exit_marker=True)
                     self.tiles.append(exit_tile)
                     self.exit_rect = exit_tile.rect
+                elif char == "X":
+                    exit_tile = Tile(
+                        x, y, load_image(BLANK_SIGN_IMAGE), solid=False, exit_marker=True, label="BOSS FIGHT"
+                    )
+                    self.tiles.append(exit_tile)
+                    self.exit_rect = exit_tile.rect
+                    self.exit_label = "BOSS FIGHT"
                 elif char == "D":
                     self.drone_spawns.append((x, y))
                 elif char == "F":

@@ -1,5 +1,6 @@
 import pygame
 
+import music
 from constants import BLACK, SCREEN_HEIGHT, SCREEN_WIDTH, WHITE
 from states.base_state import State
 
@@ -7,6 +8,8 @@ from states.base_state import State
 class MenuState(State):
     def __init__(self, game):
         super().__init__(game)
+        music.play_menu()
+
         title_font = pygame.font.SysFont(None, 64)
         body_font = pygame.font.SysFont(None, 28)
         self.title_surface = title_font.render("HULL BREACH", True, WHITE)

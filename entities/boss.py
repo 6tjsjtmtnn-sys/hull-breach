@@ -3,6 +3,8 @@ import pygame
 from constants import (
     BOSS_CHASE_SPEED,
     BOSS_DETECT_RANGE,
+    BOSS_FIRE_COOLDOWN,
+    BOSS_FIRE_RANGE,
     BOSS_HP,
     BOSS_LOSE_RANGE,
     BOSS_PATROL_SPEED,
@@ -12,6 +14,7 @@ from constants import (
     TILE_SIZE,
 )
 from entities.entity import Entity
+from entities.projectile import Projectile
 from entities.sprite_loader import load_image_scaled
 from levels.collision import check_grounded, is_ledge_ahead, resolve_axis_collision
 
@@ -33,6 +36,20 @@ class Boss(Entity):
         self._anim_timer = 0.0
         self._anim_frame = 0
         self._hurt_timer = 0.0
+        self._fire_cooldown = BOSS_FIRE_COOLDOWN
+
+    def try_fire(self, player):
+        """Returns a new Projectile aimed at the player if off cooldown
+        and in range, otherwise None."""
+        if self._fire_cooldown > 0:
+            return None
+        if self.position.distance_to(player.position) > BOSS_FIRE_RANGE:
+            return None
+
+        self._fire_cooldown = BOSS_FIRE_COOLDOWN
+        aim = player.position - self.position
+        direction = aim.normalize() if aim.length_squared() > 0 else pygame.Vector2(1, 0)
+        return Projectile(self.rect.centerx, self.rect.centery, direction)
 
     def take_hit(self):
         self.hp -= 1
@@ -41,6 +58,7 @@ class Boss(Entity):
 
     def update(self, dt, solid_tiles, player):
         self._hurt_timer = max(0.0, self._hurt_timer - dt)
+        self._fire_cooldown = max(0.0, self._fire_cooldown - dt)
 
         distance = self.position.distance_to(player.position)
         if self.state == "patrol" and distance < BOSS_DETECT_RANGE:

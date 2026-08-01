@@ -28,6 +28,7 @@ from entities.drone import Drone
 from entities.flying_drone import FlyingDrone
 from entities.particle import Particle
 from entities.player import Player
+from entities.projectile import Projectile
 from levels.camera import Camera
 from levels.level import Level
 from levels.registry import LEVELS
@@ -79,6 +80,7 @@ class PlayState(State):
         self.oxygen_drain_rate = OXYGEN_DRAIN_RATE_BASE + level_index * OXYGEN_DRAIN_RATE_INCREMENT
         self.gravity_charges = gravity_charges
         self.particles = []
+        self.projectiles = []
 
         music.play_boss() if self.is_boss_level else music.play_gameplay()
 
@@ -88,7 +90,14 @@ class PlayState(State):
         elif event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_p):
             self.next_state = PauseState(self.game, self)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_g:
-            if self.gravity_charges > 0:
+            # Returning to normal gravity is always free — only flipping
+            # away from it costs a charge. Otherwise running out of
+            # charges while flipped (e.g. up at the ceiling) would stall
+            # a level with no way back down.
+            if self.player.gravity_dir < 0:
+                self.player.flip_gravity()
+                sound.play_flip()
+            elif self.gravity_charges > 0:
                 self.gravity_charges -= 1
                 self.player.flip_gravity()
                 sound.play_flip()
@@ -105,6 +114,7 @@ class PlayState(State):
         self._check_boss_contact()
         self._check_pickups()
         self._update_particles(dt)
+        self._update_projectiles(dt)
 
         if self.is_boss_level:
             if self.hearts <= 0:
@@ -199,6 +209,33 @@ class PlayState(State):
                 self.level.tiles.remove(pickup)
                 sound.play_pickup()
 
+    def _update_projectiles(self, dt):
+        for enemy in self.enemies:
+            if isinstance(enemy, FlyingDrone):
+                projectile = enemy.try_fire(self.player)
+                if projectile is not None:
+                    self.projectiles.append(projectile)
+                    sound.play_shoot()
+
+        if self.boss is not None:
+            projectile = self.boss.try_fire(self.player)
+            if projectile is not None:
+                self.projectiles.append(projectile)
+                sound.play_shoot()
+
+        for projectile in self.projectiles:
+            projectile.update(dt)
+
+        for projectile in list(self.projectiles):
+            if projectile.rect.colliderect(self.player.rect):
+                if self.player.take_hit(projectile.rect.centerx):
+                    self._apply_hit_damage()
+                self.projectiles.remove(projectile)
+
+        self.projectiles = [
+            p for p in self.projectiles if p.alive and self.level.width > p.rect.x > -p.rect.width
+        ]
+
     def _update_particles(self, dt):
         if not self.player.on_ground or self.player.velocity.x != 0:
             if random.random() < THRUSTER_SPAWN_CHANCE:
@@ -237,6 +274,8 @@ class PlayState(State):
             entity.draw(screen, self.camera.offset)
         for particle in self.particles:
             particle.draw(screen, self.camera.offset)
+        for projectile in self.projectiles:
+            projectile.draw(screen, self.camera.offset)
 
         if self.is_boss_level:
             hud.draw_player_hearts(screen, self.hearts, PLAYER_HEARTS)
@@ -247,4 +286,4 @@ class PlayState(State):
 
         hud.draw_gravity_charges(screen, self.gravity_charges)
         if self.level.exit_rect:
-            hud.draw_exit_indicator(screen, self.level.exit_rect, self.camera.offset)
+            hud.draw_exit_indicator(screen, self.level.exit_rect, self.camera.offset, self.level.exit_label)

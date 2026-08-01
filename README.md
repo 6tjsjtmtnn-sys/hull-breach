@@ -14,21 +14,24 @@ This is my Boot.dev capstone project.
   matching the station setting.
 - **Player-controlled gravity flip.** Collect a green gravity diamond to
   gain a flip charge, then press `G` any time to flip which way is "down."
-  Charges carry over between levels — spend them whenever you want, and
-  find more diamonds to keep the ability topped up.
+  Charges carry over between levels. Flipping away from normal gravity
+  costs a charge; flipping back to normal is always free, so you can never
+  get stranded even at zero charges.
 - **Oxygen as both a timer and a health bar.** It drains continuously (the
   "get out before you run out of air" pressure) and drops further on
-  contact with drones or hazards. Oxygen pickups scattered through the
-  levels buy you more time.
+  contact with drones, hazards, or projectiles. Oxygen pickups scattered
+  through the levels buy you more time.
 - **Stomp combat.** Land on a drone from above (gravity-relative — this
   still works correctly mid-flip) to defeat it and get a little bounce.
   Touch one from the side and it hurts you instead. Ground drones patrol
-  platforms; flying drones patrol a fixed path near the ceiling.
+  platforms; flying drones patrol a fixed path near the ceiling and take
+  potshots at you with projectiles when you're in range.
 - **9 levels that ramp up**, then a final boss. Oxygen drains faster and
   enemy/hazard density increases each level; the 10th level drops the
   oxygen timer entirely for a 3-heart fight against the station's Reactor
-  Sentinel — stomp it 3 times to win, its own health bar tracking the
-  fight, different music, no clock ticking.
+  Sentinel, a scaled-up saw drone that also shoots back — stomp it 10
+  times to win, its own health bar tracking the fight, different music,
+  no clock ticking.
 
 ## How to run it
 
@@ -103,9 +106,23 @@ the moment you watch it happen and easy to miss otherwise. (The original
 switch-tile version of the gravity flip that story refers to was later
 replaced with the player-controlled charge system described above.)
 
+Playtesting after the fact caught a state-machine bug the automated bot
+never would have: resuming from pause would bounce right back into the
+pause screen. `Game.run()` swaps to `state.next_state` on a transition
+but never cleared it — so PauseState's underlying PlayState still had its
+old "go to PauseState" transition sitting on it from when it was first
+paused, and the very next frame reused that stale value and hopped
+straight back. Fixed by clearing `next_state` on the outgoing state right
+after consuming it. A good reminder that state reused across transitions
+(rather than freshly constructed each time) needs its leftover fields
+reset explicitly, and that some bugs only show up when a human plays
+naturally back and forth rather than a bot that always moves in one
+direction.
+
 ## Credits
 
-Sprites are from Kenney's "Platformer Pack Remastered" and music is from
-Kenney's "Music Loops" (both CC0, no attribution required — see
+Sprites are from Kenney's "Platformer Pack Remastered" and music (a
+separate intro/gameplay/boss track for each context) is from Kenney's
+"Music Loops" (both CC0, no attribution required — see
 `assets/ATTRIBUTION.md` for details). Sound effects are synthesized at
 runtime, not sourced from any external pack.

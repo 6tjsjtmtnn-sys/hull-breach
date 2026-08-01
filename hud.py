@@ -67,18 +67,18 @@ def draw_gravity_charges(screen, charges):
     screen.blit(text, (x + size + 8, y - 3))
 
 
-def draw_exit_indicator(screen, exit_rect, camera_offset):
+def draw_exit_indicator(screen, exit_rect, camera_offset, label="EXIT"):
     """A screen-edge arrow pointing toward the exit whenever it has
     scrolled out of view, so players always know which way to head."""
     exit_screen_x = exit_rect.centerx - camera_offset.x
 
     if exit_screen_x < 0:
-        _draw_exit_arrow(screen, EXIT_ARROW_MARGIN, pointing_left=True)
+        _draw_exit_arrow(screen, EXIT_ARROW_MARGIN, pointing_left=True, label=label)
     elif exit_screen_x > SCREEN_WIDTH:
-        _draw_exit_arrow(screen, SCREEN_WIDTH - EXIT_ARROW_MARGIN, pointing_left=False)
+        _draw_exit_arrow(screen, SCREEN_WIDTH - EXIT_ARROW_MARGIN, pointing_left=False, label=label)
 
 
-def _draw_exit_arrow(screen, x, pointing_left):
+def _draw_exit_arrow(screen, x, pointing_left, label):
     y = EXIT_ARROW_Y
     size = EXIT_ARROW_SIZE
     if pointing_left:
@@ -88,7 +88,7 @@ def _draw_exit_arrow(screen, x, pointing_left):
 
     pygame.draw.polygon(screen, EXIT_ARROW_COLOR, points)
 
-    text = _get_font().render("EXIT", True, EXIT_ARROW_COLOR)
+    text = _get_font().render(label, True, EXIT_ARROW_COLOR)
     screen.blit(text, (x - text.get_width() // 2, y + size + 4))
 
 

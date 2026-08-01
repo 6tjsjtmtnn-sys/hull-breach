@@ -3,6 +3,7 @@ from pathlib import Path
 import pygame
 
 MUSIC_DIR = Path(__file__).resolve().parent / "assets" / "music"
+MENU_TRACK = MUSIC_DIR / "menu.ogg"
 GAMEPLAY_TRACK = MUSIC_DIR / "gameplay.ogg"
 BOSS_TRACK = MUSIC_DIR / "boss.ogg"
 
@@ -22,6 +23,10 @@ def _play(track_path):
         _current_track = track_path
     except pygame.error:
         pass
+
+
+def play_menu():
+    _play(MENU_TRACK)
 
 
 def play_gameplay():

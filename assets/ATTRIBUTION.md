@@ -17,5 +17,6 @@ Full license text: `sprites/kenney_license.txt`.
 
 Background music in `music/` is from **Kenney's "Music Loops"** pack
 (CC0, no attribution required):
-- `music/gameplay.ogg` — "Space Cadet", regular level music.
+- `music/menu.ogg` — "Space Cadet", title screen intro music.
+- `music/gameplay.ogg` — "Time Driving", regular level music.
 - `music/boss.ogg` — "Mission Plausible", used for the final boss encounter.
