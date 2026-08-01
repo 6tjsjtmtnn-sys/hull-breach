@@ -12,3 +12,10 @@ Used in this project:
 - HUD/particles: `PNG/HUD/`, `PNG/Particles/` as needed
 
 Full license text: `sprites/kenney_license.txt`.
+
+## Music
+
+Background music in `music/` is from **Kenney's "Music Loops"** pack
+(CC0, no attribution required):
+- `music/gameplay.ogg` — "Space Cadet", regular level music.
+- `music/boss.ogg` — "Mission Plausible", used for the final boss encounter.

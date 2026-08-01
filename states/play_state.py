@@ -3,6 +3,7 @@ import random
 import pygame
 
 import hud
+import music
 import sound
 from constants import (
     BLACK,
@@ -61,6 +62,8 @@ class PlayState(State):
         self.oxygen = MAX_OXYGEN
         self.gravity_charges = gravity_charges
         self.particles = []
+
+        music.play_gameplay()
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:

@@ -95,6 +95,7 @@ replaced with the player-controlled charge system described above.)
 
 ## Credits
 
-Sprites are from Kenney's "Platformer Pack Remastered" (CC0 license, no
-attribution required — see `assets/ATTRIBUTION.md` for details). Sound
-effects are synthesized at runtime, not sourced from any external pack.
+Sprites are from Kenney's "Platformer Pack Remastered" and music is from
+Kenney's "Music Loops" (both CC0, no attribution required — see
+`assets/ATTRIBUTION.md` for details). Sound effects are synthesized at
+runtime, not sourced from any external pack.

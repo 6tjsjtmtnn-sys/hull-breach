@@ -1,5 +1,6 @@
 import pygame
 
+import music
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, WHITE
 from states.base_state import State
 
@@ -8,6 +9,7 @@ class PauseState(State):
     def __init__(self, game, paused_state):
         super().__init__(game)
         self.paused_state = paused_state
+        music.pause()
 
         title_font = pygame.font.SysFont(None, 48)
         body_font = pygame.font.SysFont(None, 24)
@@ -21,6 +23,7 @@ class PauseState(State):
         if event.type == pygame.QUIT:
             self.game.running = False
         elif event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_p):
+            music.unpause()
             self.next_state = self.paused_state
 
     def draw(self, screen):
