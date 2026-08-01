@@ -1,19 +1,26 @@
 import pygame
 
+import music
+import sound
 from constants import BLACK, SCREEN_HEIGHT, SCREEN_WIDTH, WHITE
 from states.base_state import State
 
 
 class GameOverState(State):
-    def __init__(self, game, won):
+    def __init__(self, game, won, title=None, subtitle=None):
         super().__init__(game)
         self.won = won
+
+        music.stop()
+        sound.play_success() if won else sound.play_lose()
 
         title_font = pygame.font.SysFont(None, 48)
         body_font = pygame.font.SysFont(None, 28)
 
-        title = "HULL BREACH SEALED" if won else "OXYGEN DEPLETED"
-        subtitle = "You escaped the station." if won else "You didn't make it out in time."
+        if title is None:
+            title = "HULL BREACH SEALED" if won else "OXYGEN DEPLETED"
+        if subtitle is None:
+            subtitle = "You escaped the station." if won else "You didn't make it out in time."
 
         self.title_surface = title_font.render(title, True, WHITE)
         self.subtitle_surface = body_font.render(subtitle, True, WHITE)

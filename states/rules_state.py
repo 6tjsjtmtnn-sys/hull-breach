@@ -8,8 +8,8 @@ RULES = [
     "Your oxygen drains over time - refill it with blue oxygen pickups.",
     "Touching spikes or a drone from the side costs oxygen and knocks you back.",
     "Land on top of a drone instead and you defeat it. Flying drones shoot back.",
-    "Collect green diamonds for a gravity-flip charge, then press G to flip -",
-    "  flipping back to normal gravity is always free.",
+    "Collect green diamonds for a gravity-flip charge, then press G to flip.",
+    "  Press G again to flip back to the ground - that return trip is always free.",
     "Run out of oxygen and it's game over.",
     f"Level 10: no oxygen timer - stomp the boss {BOSS_HP} times before it costs you all {PLAYER_HEARTS} hearts.",
 ]

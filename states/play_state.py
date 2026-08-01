@@ -118,7 +118,12 @@ class PlayState(State):
 
         if self.is_boss_level:
             if self.hearts <= 0:
-                self.next_state = GameOverState(self.game, won=False)
+                self.next_state = GameOverState(
+                    self.game,
+                    won=False,
+                    title="REACTOR BREACH",
+                    subtitle="The sentinel overwhelmed you.",
+                )
             return
 
         self.oxygen = max(0.0, self.oxygen - self.oxygen_drain_rate * dt)
@@ -127,8 +132,8 @@ class PlayState(State):
             return
 
         if self.level.exit_rect and self.player.rect.colliderect(self.level.exit_rect):
-            sound.play_success()
             if self.level_index + 1 < len(LEVELS):
+                sound.play_success()
                 self.next_state = PlayState(
                     self.game,
                     level_index=self.level_index + 1,
@@ -168,7 +173,11 @@ class PlayState(State):
             if defeated:
                 self.boss.kill()
                 self.boss = None
-                self.next_state = GameOverState(self.game, won=True)
+                self.next_state = GameOverState(
+                    self.game,
+                    won=True,
+                    subtitle="You disabled the Reactor Sentinel and escaped.",
+                )
         elif self.player.take_hit(self.boss.rect.centerx):
             self._apply_hit_damage()
 

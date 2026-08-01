@@ -7,6 +7,7 @@ CONTROLS = [
     ("Move left / right", "A / D or Arrow Keys"),
     ("Jump", "Space / W / Up"),
     ("Flip gravity (costs a charge)", "G"),
+    ("Flip back to normal (free)", "G again"),
     ("Pause / resume", "Esc or P"),
 ]
 

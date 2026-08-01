@@ -22,16 +22,19 @@ This is my Boot.dev capstone project.
   contact with drones, hazards, or projectiles. Oxygen pickups scattered
   through the levels buy you more time.
 - **Stomp combat.** Land on a drone from above (gravity-relative — this
-  still works correctly mid-flip) to defeat it and get a little bounce.
+  still works correctly mid-flip) to defeat it and get a bounce strong
+  enough to carry you up onto a nearby platform, not just a hop in place.
   Touch one from the side and it hurts you instead. Ground drones patrol
   platforms; flying drones patrol a fixed path near the ceiling and take
-  potshots at you with projectiles when you're in range.
+  potshots at you with projectiles when you're in range. Spike hazards
+  show up on elevated platforms too, not just the ground.
 - **9 levels that ramp up**, then a final boss. Oxygen drains faster and
   enemy/hazard density increases each level; the 10th level drops the
   oxygen timer entirely for a 3-heart fight against the station's Reactor
   Sentinel, a scaled-up saw drone that also shoots back — stomp it 10
   times to win, its own health bar tracking the fight, different music,
-  no clock ticking.
+  no clock ticking. Winning or losing (any level) stops the music and
+  plays a distinct win/lose sting.
 
 ## How to run it
 
@@ -58,6 +61,7 @@ reference:
 | Jump                     | `Space`, `W`, or Up arrow |
 | Pause / resume           | `Esc` or `P`          |
 | Flip gravity (needs a charge) | `G`             |
+| Flip back to normal (always free) | `G` again  |
 
 ## Running the tests
 
