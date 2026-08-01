@@ -1,6 +1,16 @@
 import pygame
 
 from constants import GRAVITY_PURPLE, SCREEN_WIDTH, WHITE
+from entities.sprite_loader import load_image
+
+HEART_SIZE = 24
+HEART_MARGIN = 16
+HEART_SPACING = 4
+
+BOSS_BAR_WIDTH = 320
+BOSS_BAR_HEIGHT = 18
+BOSS_BAR_Y = 16
+BOSS_BAR_COLOR = (200, 40, 40)
 
 BAR_WIDTH = 220
 BAR_HEIGHT = 22
@@ -80,3 +90,27 @@ def _draw_exit_arrow(screen, x, pointing_left):
 
     text = _get_font().render("EXIT", True, EXIT_ARROW_COLOR)
     screen.blit(text, (x - text.get_width() // 2, y + size + 4))
+
+
+def draw_player_hearts(screen, hearts, max_hearts):
+    full = load_image("HUD/hudHeart_full.png")
+    empty = load_image("HUD/hudHeart_empty.png")
+
+    for i in range(max_hearts):
+        image = full if i < hearts else empty
+        image = pygame.transform.smoothscale(image, (HEART_SIZE, HEART_SIZE))
+        x = HEART_MARGIN + i * (HEART_SIZE + HEART_SPACING)
+        screen.blit(image, (x, HEART_MARGIN))
+
+
+def draw_boss_health_bar(screen, hp, max_hp):
+    ratio = max(0.0, min(1.0, hp / max_hp))
+    x = (SCREEN_WIDTH - BOSS_BAR_WIDTH) // 2
+    y = BOSS_BAR_Y
+
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (x, y, BOSS_BAR_WIDTH, BOSS_BAR_HEIGHT))
+    pygame.draw.rect(screen, BOSS_BAR_COLOR, (x, y, int(BOSS_BAR_WIDTH * ratio), BOSS_BAR_HEIGHT))
+    pygame.draw.rect(screen, WHITE, (x, y, BOSS_BAR_WIDTH, BOSS_BAR_HEIGHT), width=2)
+
+    text = _get_font().render("REACTOR SENTINEL", True, WHITE)
+    screen.blit(text, (x + BOSS_BAR_WIDTH // 2 - text.get_width() // 2, y + BOSS_BAR_HEIGHT + 4))

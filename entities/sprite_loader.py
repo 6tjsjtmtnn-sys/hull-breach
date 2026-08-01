@@ -22,3 +22,13 @@ def load_image(relative_path):
 
 def load_frames(relative_paths):
     return [load_image(path) for path in relative_paths]
+
+
+def load_image_scaled(relative_path, extra_scale):
+    key = (relative_path, extra_scale)
+    if key not in _cache:
+        base = load_image(relative_path)
+        width = round(base.get_width() * extra_scale)
+        height = round(base.get_height() * extra_scale)
+        _cache[key] = pygame.transform.smoothscale(base, (width, height))
+    return _cache[key]

@@ -7,6 +7,7 @@ from levels.data.level_06 import LEVEL as LEVEL_06
 from levels.data.level_07 import LEVEL as LEVEL_07
 from levels.data.level_08 import LEVEL as LEVEL_08
 from levels.data.level_09 import LEVEL as LEVEL_09
+from levels.data.level_10 import LEVEL as LEVEL_10
 
 LEVELS = [
     LEVEL_01,
@@ -18,4 +19,5 @@ LEVELS = [
     LEVEL_07,
     LEVEL_08,
     LEVEL_09,
+    LEVEL_10,
 ]

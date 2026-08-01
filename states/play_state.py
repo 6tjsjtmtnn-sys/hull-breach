@@ -7,12 +7,14 @@ import music
 import sound
 from constants import (
     BLACK,
+    BOSS_HP,
     GRAVITY_CHARGE_AMOUNT,
     HAZARD_DAMAGE,
     MAX_OXYGEN,
     OXYGEN_DRAIN_RATE_BASE,
     OXYGEN_DRAIN_RATE_INCREMENT,
     OXYGEN_PICKUP_AMOUNT,
+    PLAYER_HEARTS,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     STATION_BLUE,
@@ -21,6 +23,7 @@ from constants import (
     WARNING_ORANGE,
     WHITE,
 )
+from entities.boss import Boss
 from entities.drone import Drone
 from entities.flying_drone import FlyingDrone
 from entities.particle import Particle
@@ -56,6 +59,7 @@ class PlayState(State):
         Player.containers = (self.updatable, self.drawable)
         Drone.containers = (self.updatable, self.drawable)
         FlyingDrone.containers = (self.updatable, self.drawable)
+        Boss.containers = (self.updatable, self.drawable)
 
         self.level = Level(LEVELS[level_index])
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, self.level.width, self.level.height)
@@ -66,12 +70,17 @@ class PlayState(State):
         self.enemies = [Drone(x, y) for x, y in self.level.drone_spawns] + [
             FlyingDrone(x, y) for x, y in self.level.flying_drone_spawns
         ]
+
+        self.is_boss_level = self.level.boss_spawn is not None
+        self.boss = Boss(*self.level.boss_spawn) if self.is_boss_level else None
+        self.hearts = PLAYER_HEARTS
+
         self.oxygen = MAX_OXYGEN
         self.oxygen_drain_rate = OXYGEN_DRAIN_RATE_BASE + level_index * OXYGEN_DRAIN_RATE_INCREMENT
         self.gravity_charges = gravity_charges
         self.particles = []
 
-        music.play_gameplay()
+        music.play_boss() if self.is_boss_level else music.play_gameplay()
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
@@ -93,8 +102,14 @@ class PlayState(State):
 
         self.camera.update(self.player.position)
         self._check_hazards()
+        self._check_boss_contact()
         self._check_pickups()
         self._update_particles(dt)
+
+        if self.is_boss_level:
+            if self.hearts <= 0:
+                self.next_state = GameOverState(self.game, won=False)
+            return
 
         self.oxygen = max(0.0, self.oxygen - self.oxygen_drain_rate * dt)
         if self.oxygen <= 0:
@@ -112,6 +127,12 @@ class PlayState(State):
             else:
                 self.next_state = GameOverState(self.game, won=True)
 
+    def _apply_hit_damage(self):
+        if self.is_boss_level:
+            self.hearts -= 1
+        else:
+            self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
+
     def _check_hazards(self):
         for enemy in list(self.enemies):
             if not self.player.rect.colliderect(enemy.rect):
@@ -119,12 +140,27 @@ class PlayState(State):
             if self._is_stomp(enemy):
                 self._defeat_enemy(enemy)
             elif self.player.take_hit(enemy.rect.centerx):
-                self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
+                self._apply_hit_damage()
 
         for hazard in self.level.hazard_tiles:
             if self.player.rect.colliderect(hazard.rect):
                 if self.player.take_hit(hazard.rect.centerx):
-                    self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
+                    self._apply_hit_damage()
+
+    def _check_boss_contact(self):
+        if self.boss is None or not self.player.rect.colliderect(self.boss.rect):
+            return
+
+        if self._is_stomp(self.boss):
+            self.player.velocity.y = -STOMP_BOUNCE * self.player.gravity_dir
+            sound.play_boss_hit()
+            defeated = self.boss.take_hit()
+            if defeated:
+                self.boss.kill()
+                self.boss = None
+                self.next_state = GameOverState(self.game, won=True)
+        elif self.player.take_hit(self.boss.rect.centerx):
+            self._apply_hit_damage()
 
     def _is_stomp(self, enemy):
         """Landing on an enemy from the gravity-relative 'above' side while
@@ -201,7 +237,14 @@ class PlayState(State):
             entity.draw(screen, self.camera.offset)
         for particle in self.particles:
             particle.draw(screen, self.camera.offset)
-        hud.draw_oxygen_bar(screen, self.oxygen, MAX_OXYGEN)
+
+        if self.is_boss_level:
+            hud.draw_player_hearts(screen, self.hearts, PLAYER_HEARTS)
+            if self.boss is not None:
+                hud.draw_boss_health_bar(screen, self.boss.hp, BOSS_HP)
+        else:
+            hud.draw_oxygen_bar(screen, self.oxygen, MAX_OXYGEN)
+
         hud.draw_gravity_charges(screen, self.gravity_charges)
         if self.level.exit_rect:
             hud.draw_exit_indicator(screen, self.level.exit_rect, self.camera.offset)

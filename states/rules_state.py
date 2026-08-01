@@ -10,6 +10,7 @@ RULES = [
     "Land on top of a drone instead and you defeat it.",
     "Collect green diamonds for a gravity-flip charge, then press G to flip.",
     "Run out of oxygen and it's game over.",
+    "Level 10: no oxygen timer - defeat the boss with 3 stomps before it costs you 3 hearts.",
 ]
 
 
@@ -36,10 +37,10 @@ class RulesState(State):
         center_x = SCREEN_WIDTH // 2
         screen.blit(self.title_surface, self.title_surface.get_rect(center=(center_x, 90)))
 
-        y = 190
+        y = 170
         for line in self.lines:
-            screen.blit(line, (center_x - 300, y))
-            y += 44
+            screen.blit(line, (center_x - 320, y))
+            y += 42
 
         screen.blit(
             self.prompt_surface, self.prompt_surface.get_rect(center=(center_x, SCREEN_HEIGHT - 60))

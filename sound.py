@@ -57,3 +57,7 @@ def play_flip():
 
 def play_defeat():
     _play("defeat", 500, 0.2, volume=0.3, wave="square", sweep_to=120)
+
+
+def play_boss_hit():
+    _play("boss_hit", 200, 0.2, volume=0.35, wave="square", sweep_to=80)

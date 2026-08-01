@@ -3,7 +3,8 @@
 A 2D platformer built with Python and Pygame. You play an astronaut escaping
 a derelict, failing space station — running and jumping across collapsing
 corridors, dodging malfunctioning drone sentries, and surviving sections
-where gravity itself reverses on you, all before your oxygen supply runs out.
+where gravity itself reverses on you, all before your oxygen supply runs
+out — capped off by a boss fight against the station's reactor sentinel.
 
 This is my Boot.dev capstone project.
 
@@ -23,8 +24,11 @@ This is my Boot.dev capstone project.
   still works correctly mid-flip) to defeat it and get a little bounce.
   Touch one from the side and it hurts you instead. Ground drones patrol
   platforms; flying drones patrol a fixed path near the ceiling.
-- **9 levels that ramp up.** Oxygen drains faster and enemy/hazard density
-  increases on every level, building toward a final encounter.
+- **9 levels that ramp up**, then a final boss. Oxygen drains faster and
+  enemy/hazard density increases each level; the 10th level drops the
+  oxygen timer entirely for a 3-heart fight against the station's Reactor
+  Sentinel — stomp it 3 times to win, its own health bar tracking the
+  fight, different music, no clock ticking.
 
 ## How to run it
 
