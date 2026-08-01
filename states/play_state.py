@@ -10,6 +10,8 @@ from constants import (
     BOSS_HP,
     GRAVITY_CHARGE_AMOUNT,
     HAZARD_DAMAGE,
+    HEART_PICKUP_MAX_SPAWN_DELAY,
+    HEART_PICKUP_MIN_SPAWN_DELAY,
     MAX_OXYGEN,
     OXYGEN_DRAIN_RATE_BASE,
     OXYGEN_DRAIN_RATE_INCREMENT,
@@ -20,12 +22,14 @@ from constants import (
     STATION_BLUE,
     STOMP_BOUNCE,
     STOMP_TOLERANCE,
+    TILE_SIZE,
     WARNING_ORANGE,
     WHITE,
 )
 from entities.boss import Boss
 from entities.drone import Drone
 from entities.flying_drone import FlyingDrone
+from entities.heart_pickup import HeartPickup
 from entities.particle import Particle
 from entities.player import Player
 from entities.projectile import Projectile
@@ -75,6 +79,8 @@ class PlayState(State):
         self.is_boss_level = self.level.boss_spawn is not None
         self.boss = Boss(*self.level.boss_spawn) if self.is_boss_level else None
         self.hearts = PLAYER_HEARTS
+        self.heart_pickup = None
+        self.heart_pickup_timer = random.uniform(HEART_PICKUP_MIN_SPAWN_DELAY, HEART_PICKUP_MAX_SPAWN_DELAY)
 
         self.oxygen = MAX_OXYGEN
         self.oxygen_drain_rate = OXYGEN_DRAIN_RATE_BASE + level_index * OXYGEN_DRAIN_RATE_INCREMENT
@@ -117,6 +123,7 @@ class PlayState(State):
         self._update_projectiles(dt)
 
         if self.is_boss_level:
+            self._update_heart_pickup(dt)
             if self.hearts <= 0:
                 self.next_state = GameOverState(
                     self.game,
@@ -218,6 +225,36 @@ class PlayState(State):
                 self.level.tiles.remove(pickup)
                 sound.play_pickup()
 
+    def _update_heart_pickup(self, dt):
+        """Boss fight has no oxygen drain, so hearts are otherwise
+        permanent damage — this bonus heart is the only way to recover
+        one, appearing at a random spot every so often and disappearing
+        again if it isn't reached in time."""
+        if self.heart_pickup is not None:
+            self.heart_pickup.update(dt)
+            if self.player.rect.colliderect(self.heart_pickup.rect):
+                self.hearts = min(PLAYER_HEARTS, self.hearts + 1)
+                sound.play_pickup()
+                self.heart_pickup = None
+                self.heart_pickup_timer = random.uniform(HEART_PICKUP_MIN_SPAWN_DELAY, HEART_PICKUP_MAX_SPAWN_DELAY)
+            elif not self.heart_pickup.alive:
+                self.heart_pickup = None
+                self.heart_pickup_timer = random.uniform(HEART_PICKUP_MIN_SPAWN_DELAY, HEART_PICKUP_MAX_SPAWN_DELAY)
+            return
+
+        self.heart_pickup_timer -= dt
+        if self.heart_pickup_timer <= 0:
+            if self.hearts < PLAYER_HEARTS:
+                self._spawn_heart_pickup()
+            else:
+                self.heart_pickup_timer = random.uniform(HEART_PICKUP_MIN_SPAWN_DELAY, HEART_PICKUP_MAX_SPAWN_DELAY)
+
+    def _spawn_heart_pickup(self):
+        _, spawn_y = self.level.player_spawn
+        margin = TILE_SIZE * 2
+        x = random.uniform(margin, self.level.width - margin)
+        self.heart_pickup = HeartPickup(x, spawn_y)
+
     def _update_projectiles(self, dt):
         for enemy in self.enemies:
             if isinstance(enemy, FlyingDrone):
@@ -285,6 +322,8 @@ class PlayState(State):
             particle.draw(screen, self.camera.offset)
         for projectile in self.projectiles:
             projectile.draw(screen, self.camera.offset)
+        if self.heart_pickup is not None:
+            self.heart_pickup.draw(screen, self.camera.offset)
 
         if self.is_boss_level:
             hud.draw_player_hearts(screen, self.hearts, PLAYER_HEARTS)

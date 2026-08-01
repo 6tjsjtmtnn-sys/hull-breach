@@ -34,7 +34,10 @@ This is my Boot.dev capstone project.
   Sentinel, a scaled-up saw drone that also shoots back — stomp it 10
   times to win, its own health bar tracking the fight, different music,
   no clock ticking. Winning or losing (any level) stops the music and
-  plays a distinct win/lose sting.
+  plays a distinct win/lose sting. Since there's no other way to recover
+  a lost heart during the fight, a bonus heart pickup appears at a random
+  spot every so often (only while you're missing one) and vanishes again
+  if you don't reach it in time.
 
 ## How to run it
 
