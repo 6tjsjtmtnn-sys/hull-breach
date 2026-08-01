@@ -6,7 +6,8 @@ from states.base_state import State
 RULES = [
     "Reach the exit sign on each level to move on to the next.",
     "Your oxygen drains over time - refill it with blue oxygen pickups.",
-    "Touching a drone or spikes costs oxygen and knocks you back.",
+    "Touching spikes or a drone from the side costs oxygen and knocks you back.",
+    "Land on top of a drone instead and you defeat it.",
     "Collect green diamonds for a gravity-flip charge, then press G to flip.",
     "Run out of oxygen and it's game over.",
 ]

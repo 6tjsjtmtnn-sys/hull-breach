@@ -19,6 +19,10 @@ This is my Boot.dev capstone project.
   "get out before you run out of air" pressure) and drops further on
   contact with drones or hazards. Oxygen pickups scattered through the
   levels buy you more time.
+- **Stomp combat.** Land on a drone from above (gravity-relative — this
+  still works correctly mid-flip) to defeat it and get a little bounce.
+  Touch one from the side and it hurts you instead. Ground drones patrol
+  platforms; flying drones patrol a fixed path near the ceiling.
 
 ## How to run it
 

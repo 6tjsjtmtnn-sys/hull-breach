@@ -21,6 +21,7 @@ class Level:
         self.player_spawn = (0, 0)
         self.exit_rect = None
         self.drone_spawns = []
+        self.flying_drone_spawns = []
 
         self.width = max(len(row) for row in grid) * tile_size
         self.height = len(grid) * tile_size
@@ -47,6 +48,8 @@ class Level:
                     self.exit_rect = exit_tile.rect
                 elif char == "D":
                     self.drone_spawns.append((x, y))
+                elif char == "F":
+                    self.flying_drone_spawns.append((x, y))
                 elif char == "O":
                     self.tiles.append(
                         Tile(x, y, load_image(OXYGEN_PICKUP_IMAGE), solid=False, oxygen_pickup=True)

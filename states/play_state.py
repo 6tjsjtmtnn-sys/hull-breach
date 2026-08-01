@@ -15,10 +15,13 @@ from constants import (
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     STATION_BLUE,
+    STOMP_BOUNCE,
+    STOMP_TOLERANCE,
     WARNING_ORANGE,
     WHITE,
 )
 from entities.drone import Drone
+from entities.flying_drone import FlyingDrone
 from entities.particle import Particle
 from entities.player import Player
 from levels.camera import Camera
@@ -51,6 +54,7 @@ class PlayState(State):
         self.drawable = pygame.sprite.Group()
         Player.containers = (self.updatable, self.drawable)
         Drone.containers = (self.updatable, self.drawable)
+        FlyingDrone.containers = (self.updatable, self.drawable)
 
         self.level = Level(LEVELS[level_index])
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, self.level.width, self.level.height)
@@ -58,7 +62,9 @@ class PlayState(State):
 
         spawn_x, spawn_y = self.level.player_spawn
         self.player = Player(spawn_x, spawn_y)
-        self.drones = [Drone(x, y) for x, y in self.level.drone_spawns]
+        self.enemies = [Drone(x, y) for x, y in self.level.drone_spawns] + [
+            FlyingDrone(x, y) for x, y in self.level.flying_drone_spawns
+        ]
         self.oxygen = MAX_OXYGEN
         self.gravity_charges = gravity_charges
         self.particles = []
@@ -105,15 +111,42 @@ class PlayState(State):
                 self.next_state = GameOverState(self.game, won=True)
 
     def _check_hazards(self):
-        for drone in self.drones:
-            if self.player.rect.colliderect(drone.rect):
-                if self.player.take_hit(drone.rect.centerx):
-                    self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
+        for enemy in list(self.enemies):
+            if not self.player.rect.colliderect(enemy.rect):
+                continue
+            if self._is_stomp(enemy):
+                self._defeat_enemy(enemy)
+            elif self.player.take_hit(enemy.rect.centerx):
+                self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
 
         for hazard in self.level.hazard_tiles:
             if self.player.rect.colliderect(hazard.rect):
                 if self.player.take_hit(hazard.rect.centerx):
                     self.oxygen = max(0.0, self.oxygen - HAZARD_DAMAGE)
+
+    def _is_stomp(self, enemy):
+        """Landing on an enemy from the gravity-relative 'above' side while
+        falling into it defeats it instead of hurting the player."""
+        player = self.player
+        if player.gravity_dir > 0:
+            falling = player.velocity.y > 0
+            leading_edge = player.rect.bottom
+            return falling and leading_edge <= enemy.rect.centery + STOMP_TOLERANCE
+        else:
+            falling = player.velocity.y < 0
+            leading_edge = player.rect.top
+            return falling and leading_edge >= enemy.rect.centery - STOMP_TOLERANCE
+
+    def _defeat_enemy(self, enemy):
+        self.enemies.remove(enemy)
+        enemy.kill()
+        self.player.velocity.y = -STOMP_BOUNCE * self.player.gravity_dir
+        sound.play_defeat()
+        for _ in range(10):
+            vel = pygame.Vector2(random.uniform(-80, 80), random.uniform(-80, 80))
+            self.particles.append(
+                Particle(enemy.rect.centerx, enemy.rect.centery, vel, WARNING_ORANGE, lifetime=0.4, radius=3)
+            )
 
     def _check_pickups(self):
         for pickup in self.level.oxygen_pickup_tiles:
@@ -140,11 +173,11 @@ class PlayState(State):
                     Particle(self.player.rect.centerx, spawn_y, vel, STATION_BLUE, lifetime=0.35, radius=3)
                 )
 
-        for drone in self.drones:
+        for enemy in self.enemies:
             if random.random() < DRONE_SPARK_SPAWN_CHANCE:
                 vel = pygame.Vector2(random.uniform(-30, 30), random.uniform(-30, 30))
                 self.particles.append(
-                    Particle(drone.rect.centerx, drone.rect.centery, vel, WARNING_ORANGE, lifetime=0.3, radius=2)
+                    Particle(enemy.rect.centerx, enemy.rect.centery, vel, WARNING_ORANGE, lifetime=0.3, radius=2)
                 )
 
         for hazard in self.level.hazard_tiles:

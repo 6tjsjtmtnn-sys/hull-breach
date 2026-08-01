@@ -53,3 +53,7 @@ def play_success():
 
 def play_flip():
     _play("flip", 300, 0.25, volume=0.3, wave="sine", sweep_to=900)
+
+
+def play_defeat():
+    _play("defeat", 500, 0.2, volume=0.3, wave="square", sweep_to=120)
