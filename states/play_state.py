@@ -109,6 +109,16 @@ class PlayState(State):
                 self.gravity_charges -= 1
                 self.player.flip_gravity()
                 sound.play_flip()
+        elif event.type == pygame.KEYDOWN and pygame.K_0 <= event.key <= pygame.K_9:
+            # DEV/TEST ONLY: number keys jump straight to that level (1-9,
+            # 0 = level 10) for testing without replaying from the start.
+            # Remove before shipping if not wanted as a real feature.
+            digit = event.key - pygame.K_0
+            target_index = 9 if digit == 0 else digit - 1
+            if target_index < len(LEVELS):
+                self.next_state = PlayState(
+                    self.game, level_index=target_index, gravity_charges=self.gravity_charges
+                )
 
     def update(self, dt):
         for entity in self.updatable:

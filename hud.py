@@ -1,6 +1,6 @@
 import pygame
 
-from constants import GRAVITY_PURPLE, SCREEN_WIDTH, WHITE
+from constants import GRAVITY_GREEN, HUD_CYAN, SCREEN_WIDTH, WHITE
 from entities.sprite_loader import load_image
 
 HEART_SIZE = 24
@@ -65,7 +65,7 @@ def draw_gravity_charges(screen, charges):
     cy = y + size // 2
     diamond = [(cx, y), (x + size, cy), (cx, y + size), (x, cy)]
 
-    pygame.draw.polygon(screen, GRAVITY_PURPLE, diamond)
+    pygame.draw.polygon(screen, GRAVITY_GREEN, diamond)
     pygame.draw.polygon(screen, WHITE, diamond, width=1)
 
     text = _get_font().render(f"x {charges}  [G]", True, WHITE)
@@ -110,9 +110,16 @@ def draw_player_hearts(screen, hearts, max_hearts):
 
 def draw_level_indicator(screen, level_index, total_levels, label=None):
     text_str = label if label is not None else f"LEVEL {level_index + 1} / {total_levels}"
-    text = _get_font().render(text_str, True, WHITE)
+    text = _get_font().render(text_str, True, HUD_CYAN)
     x = SCREEN_WIDTH - text.get_width() - LEVEL_INDICATOR_MARGIN
-    screen.blit(text, (x, LEVEL_INDICATOR_MARGIN))
+    y = LEVEL_INDICATOR_MARGIN
+
+    padding = 6
+    backing = pygame.Rect(
+        x - padding, y - padding // 2, text.get_width() + padding * 2, text.get_height() + padding
+    )
+    pygame.draw.rect(screen, BACKGROUND_COLOR, backing)
+    screen.blit(text, (x, y))
 
 
 def draw_boss_health_bar(screen, hp, max_hp):
