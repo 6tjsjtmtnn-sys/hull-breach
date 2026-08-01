@@ -24,6 +24,8 @@ from constants import (
     STATION_BLUE,
     STOMP_BOUNCE,
     STOMP_TOLERANCE,
+    SWEEP_DRONE_MAX_SPAWN_DELAY,
+    SWEEP_DRONE_MIN_SPAWN_DELAY,
     TILE_SIZE,
     WARNING_ORANGE,
     WHITE,
@@ -35,6 +37,7 @@ from entities.heart_pickup import HeartPickup
 from entities.particle import Particle
 from entities.player import Player
 from entities.projectile import Projectile
+from entities.sweep_drone import SweepDrone
 from levels.camera import Camera
 from levels.level import Level
 from levels.registry import LEVELS
@@ -67,6 +70,7 @@ class PlayState(State):
         Drone.containers = (self.updatable, self.drawable)
         FlyingDrone.containers = (self.updatable, self.drawable)
         Boss.containers = (self.updatable, self.drawable)
+        SweepDrone.containers = (self.updatable, self.drawable)
 
         self.level = Level(LEVELS[level_index])
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, self.level.width, self.level.height)
@@ -83,6 +87,8 @@ class PlayState(State):
         self.hearts = PLAYER_HEARTS
         self.heart_pickup = None
         self.heart_pickup_timer = random.uniform(HEART_PICKUP_MIN_SPAWN_DELAY, HEART_PICKUP_MAX_SPAWN_DELAY)
+        self.sweep_drones = []
+        self.sweep_drone_timer = random.uniform(SWEEP_DRONE_MIN_SPAWN_DELAY, SWEEP_DRONE_MAX_SPAWN_DELAY)
 
         self.oxygen = MAX_OXYGEN
         self.oxygen_drain_rate = OXYGEN_DRAIN_RATE_BASE + level_index * OXYGEN_DRAIN_RATE_INCREMENT
@@ -136,6 +142,7 @@ class PlayState(State):
 
         if self.is_boss_level:
             self._update_heart_pickup(dt)
+            self._update_sweep_drones(dt)
             if self.hearts <= 0:
                 self.next_state = GameOverState(
                     self.game,
@@ -274,6 +281,47 @@ class PlayState(State):
         x = self.player.rect.centerx + offset
         x = max(margin, min(self.level.width - margin, x))
         self.heart_pickup = HeartPickup(x, spawn_y)
+
+    def _update_sweep_drones(self, dt):
+        """Every so often, a flying drone sweeps straight across the
+        screen from one edge to the other during the boss fight — extra,
+        unpredictable danger on top of the boss itself. Reuses the same
+        stomp/hurt handling as any other enemy via self.enemies; this
+        just manages spawning and despawning once it's crossed off the
+        opposite edge of the camera's current view."""
+        margin = TILE_SIZE * 2
+        view_left = self.camera.offset.x - margin
+        view_right = self.camera.offset.x + SCREEN_WIDTH + margin
+
+        for drone in list(self.sweep_drones):
+            if drone not in self.enemies:
+                # already defeated by a stomp elsewhere this frame
+                self.sweep_drones.remove(drone)
+                continue
+            exited = (drone.direction > 0 and drone.rect.x > view_right) or (
+                drone.direction < 0 and drone.rect.x < view_left
+            )
+            if exited:
+                self.sweep_drones.remove(drone)
+                self.enemies.remove(drone)
+                drone.kill()
+
+        self.sweep_drone_timer -= dt
+        if self.sweep_drone_timer <= 0:
+            self._spawn_sweep_drone()
+            self.sweep_drone_timer = random.uniform(SWEEP_DRONE_MIN_SPAWN_DELAY, SWEEP_DRONE_MAX_SPAWN_DELAY)
+
+    def _spawn_sweep_drone(self):
+        margin = TILE_SIZE * 2
+        direction = random.choice((-1, 1))
+        if direction > 0:
+            x = self.camera.offset.x - margin
+        else:
+            x = self.camera.offset.x + SCREEN_WIDTH + margin
+        y = random.uniform(TILE_SIZE * 2, self.level.height - TILE_SIZE * 4)
+        drone = SweepDrone(x, y, direction)
+        self.sweep_drones.append(drone)
+        self.enemies.append(drone)
 
     def _update_projectiles(self, dt):
         for enemy in self.enemies:
