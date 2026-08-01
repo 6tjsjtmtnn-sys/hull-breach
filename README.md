@@ -23,6 +23,8 @@ This is my Boot.dev capstone project.
   still works correctly mid-flip) to defeat it and get a little bounce.
   Touch one from the side and it hurts you instead. Ground drones patrol
   platforms; flying drones patrol a fixed path near the ceiling.
+- **9 levels that ramp up.** Oxygen drains faster and enemy/hazard density
+  increases on every level, building toward a final encounter.
 
 ## How to run it
 

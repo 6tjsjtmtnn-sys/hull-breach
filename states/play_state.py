@@ -10,7 +10,8 @@ from constants import (
     GRAVITY_CHARGE_AMOUNT,
     HAZARD_DAMAGE,
     MAX_OXYGEN,
-    OXYGEN_DRAIN_RATE,
+    OXYGEN_DRAIN_RATE_BASE,
+    OXYGEN_DRAIN_RATE_INCREMENT,
     OXYGEN_PICKUP_AMOUNT,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
@@ -66,6 +67,7 @@ class PlayState(State):
             FlyingDrone(x, y) for x, y in self.level.flying_drone_spawns
         ]
         self.oxygen = MAX_OXYGEN
+        self.oxygen_drain_rate = OXYGEN_DRAIN_RATE_BASE + level_index * OXYGEN_DRAIN_RATE_INCREMENT
         self.gravity_charges = gravity_charges
         self.particles = []
 
@@ -94,7 +96,7 @@ class PlayState(State):
         self._check_pickups()
         self._update_particles(dt)
 
-        self.oxygen = max(0.0, self.oxygen - OXYGEN_DRAIN_RATE * dt)
+        self.oxygen = max(0.0, self.oxygen - self.oxygen_drain_rate * dt)
         if self.oxygen <= 0:
             self.next_state = GameOverState(self.game, won=False)
             return
