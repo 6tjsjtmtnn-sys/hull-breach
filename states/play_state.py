@@ -10,7 +10,9 @@ from constants import (
     BOSS_HP,
     GRAVITY_CHARGE_AMOUNT,
     HAZARD_DAMAGE,
+    HEART_PICKUP_MAX_DISTANCE,
     HEART_PICKUP_MAX_SPAWN_DELAY,
+    HEART_PICKUP_MIN_DISTANCE,
     HEART_PICKUP_MIN_SPAWN_DELAY,
     MAX_OXYGEN,
     OXYGEN_DRAIN_RATE_BASE,
@@ -250,9 +252,17 @@ class PlayState(State):
                 self.heart_pickup_timer = random.uniform(HEART_PICKUP_MIN_SPAWN_DELAY, HEART_PICKUP_MAX_SPAWN_DELAY)
 
     def _spawn_heart_pickup(self):
+        # Spawn near wherever the player currently is, not a random point
+        # in the whole arena — with only HEART_PICKUP_LIFETIME seconds
+        # before it disappears and a boss to dodge at the same time, a
+        # pickup on the far side of the level would be effectively
+        # unreachable.
         _, spawn_y = self.level.player_spawn
         margin = TILE_SIZE * 2
-        x = random.uniform(margin, self.level.width - margin)
+        offset = random.uniform(HEART_PICKUP_MIN_DISTANCE, HEART_PICKUP_MAX_DISTANCE)
+        offset *= random.choice((-1, 1))
+        x = self.player.rect.centerx + offset
+        x = max(margin, min(self.level.width - margin, x))
         self.heart_pickup = HeartPickup(x, spawn_y)
 
     def _update_projectiles(self, dt):
@@ -335,3 +345,6 @@ class PlayState(State):
         hud.draw_gravity_charges(screen, self.gravity_charges)
         if self.level.exit_rect:
             hud.draw_exit_indicator(screen, self.level.exit_rect, self.camera.offset, self.level.exit_label)
+
+        label = "REACTOR CORE" if self.is_boss_level else None
+        hud.draw_level_indicator(screen, self.level_index, len(LEVELS), label=label)

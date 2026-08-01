@@ -9,6 +9,7 @@ from constants import (
     BOSS_LOSE_RANGE,
     BOSS_PATROL_SPEED,
     BOSS_SCALE,
+    CHASE_DEADZONE,
     GRAVITY,
     MAX_FALL_SPEED,
     TILE_SIZE,
@@ -67,8 +68,12 @@ class Boss(Entity):
             self.state = "patrol"
 
         if self.state == "chase":
-            self.direction = 1 if player.position.x > self.position.x else -1
-            self.velocity.x = self.direction * BOSS_CHASE_SPEED
+            dx = player.position.x - self.position.x
+            if abs(dx) > CHASE_DEADZONE:
+                self.direction = 1 if dx > 0 else -1
+                self.velocity.x = self.direction * BOSS_CHASE_SPEED
+            else:
+                self.velocity.x = 0
         else:
             self.velocity.x = self.direction * BOSS_PATROL_SPEED
 

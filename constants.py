@@ -19,6 +19,13 @@ DRONE_CHASE_SPEED = 140.0
 DRONE_DETECT_RANGE = 220.0
 DRONE_LOSE_RANGE = 300.0
 
+# Below this horizontal distance, a chasing enemy holds still instead of
+# picking a direction — without it, once the player's x lands within one
+# frame's movement of the enemy's x (e.g. stomping it from directly
+# above), the direction flips every frame and the enemy visibly freezes
+# instead of chasing, oscillating by a couple of pixels forever.
+CHASE_DEADZONE = 6.0
+
 FLYING_DRONE_SPEED = 80.0
 FLYING_DRONE_PATROL_RANGE = 150.0
 FLYING_DRONE_FIRE_RANGE = 320.0
@@ -52,6 +59,8 @@ HEART_PICKUP_SIZE = 28
 HEART_PICKUP_LIFETIME = 6.0
 HEART_PICKUP_MIN_SPAWN_DELAY = 8.0
 HEART_PICKUP_MAX_SPAWN_DELAY = 14.0
+HEART_PICKUP_MIN_DISTANCE = 60.0
+HEART_PICKUP_MAX_DISTANCE = 220.0
 
 BLACK = (10, 10, 16)
 WHITE = (240, 240, 245)

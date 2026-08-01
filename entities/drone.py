@@ -1,4 +1,5 @@
 from constants import (
+    CHASE_DEADZONE,
     DRONE_CHASE_SPEED,
     DRONE_DETECT_RANGE,
     DRONE_LOSE_RANGE,
@@ -31,8 +32,12 @@ class Drone(Entity):
             self.state = "patrol"
 
         if self.state == "chase":
-            self.direction = 1 if player.position.x > self.position.x else -1
-            self.velocity.x = self.direction * DRONE_CHASE_SPEED
+            dx = player.position.x - self.position.x
+            if abs(dx) > CHASE_DEADZONE:
+                self.direction = 1 if dx > 0 else -1
+                self.velocity.x = self.direction * DRONE_CHASE_SPEED
+            else:
+                self.velocity.x = 0
         else:
             self.velocity.x = self.direction * DRONE_PATROL_SPEED
 

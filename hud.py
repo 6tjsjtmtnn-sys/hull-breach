@@ -27,6 +27,8 @@ EXIT_ARROW_Y = 90
 EXIT_ARROW_MARGIN = 24
 EXIT_ARROW_SIZE = 14
 
+LEVEL_INDICATOR_MARGIN = 16
+
 _font = None
 
 
@@ -101,6 +103,13 @@ def draw_player_hearts(screen, hearts, max_hearts):
         image = pygame.transform.smoothscale(image, (HEART_SIZE, HEART_SIZE))
         x = HEART_MARGIN + i * (HEART_SIZE + HEART_SPACING)
         screen.blit(image, (x, HEART_MARGIN))
+
+
+def draw_level_indicator(screen, level_index, total_levels, label=None):
+    text_str = label if label is not None else f"LEVEL {level_index + 1} / {total_levels}"
+    text = _get_font().render(text_str, True, WHITE)
+    x = SCREEN_WIDTH - text.get_width() - LEVEL_INDICATOR_MARGIN
+    screen.blit(text, (x, LEVEL_INDICATOR_MARGIN))
 
 
 def draw_boss_health_bar(screen, hp, max_hp):
