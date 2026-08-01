@@ -31,6 +31,7 @@ class Drone(Entity):
         elif self.state == "chase" and distance > DRONE_LOSE_RANGE:
             self.state = "patrol"
 
+        held_still = False
         if self.state == "chase":
             dx = player.position.x - self.position.x
             if abs(dx) > CHASE_DEADZONE:
@@ -38,6 +39,7 @@ class Drone(Entity):
                 self.velocity.x = self.direction * DRONE_CHASE_SPEED
             else:
                 self.velocity.x = 0
+                held_still = True
         else:
             self.velocity.x = self.direction * DRONE_PATROL_SPEED
 
@@ -57,12 +59,13 @@ class Drone(Entity):
         if on_ground and self.velocity.y >= 0:
             self.velocity.y = 0
 
-        hit_wall = self.velocity.x == 0
-        ledge_ahead = on_ground and is_ledge_ahead(
-            self.rect, solid_tiles, self.direction, 1, TILE_SIZE
-        )
-        if hit_wall or ledge_ahead:
-            self.direction *= -1
+        if not held_still:
+            hit_wall = self.velocity.x == 0
+            ledge_ahead = on_ground and is_ledge_ahead(
+                self.rect, solid_tiles, self.direction, 1, TILE_SIZE
+            )
+            if hit_wall or ledge_ahead:
+                self.direction *= -1
 
         self.position.update(self.rect.topleft)
         self._update_animation(dt)

@@ -69,8 +69,10 @@ class Boss(Entity):
         elif self.state == "chase" and distance > BOSS_LOSE_RANGE:
             self.state = "patrol"
 
+        held_still = False
         if self._stun_timer > 0:
             self.velocity.x = 0
+            held_still = True
         elif self.state == "chase":
             dx = player.position.x - self.position.x
             if abs(dx) > CHASE_DEADZONE:
@@ -78,6 +80,7 @@ class Boss(Entity):
                 self.velocity.x = self.direction * BOSS_CHASE_SPEED
             else:
                 self.velocity.x = 0
+                held_still = True
         else:
             self.velocity.x = self.direction * BOSS_PATROL_SPEED
 
@@ -97,7 +100,7 @@ class Boss(Entity):
         if on_ground and self.velocity.y >= 0:
             self.velocity.y = 0
 
-        if self._stun_timer <= 0:
+        if not held_still:
             hit_wall = self.velocity.x == 0
             ledge_ahead = on_ground and is_ledge_ahead(
                 self.rect, solid_tiles, self.direction, 1, TILE_SIZE

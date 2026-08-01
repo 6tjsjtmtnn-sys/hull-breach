@@ -20,10 +20,6 @@ def load_image(relative_path):
     return _cache[relative_path]
 
 
-def load_frames(relative_paths):
-    return [load_image(path) for path in relative_paths]
-
-
 def load_image_scaled(relative_path, extra_scale):
     key = (relative_path, extra_scale)
     if key not in _cache:
