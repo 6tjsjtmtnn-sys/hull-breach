@@ -8,7 +8,21 @@ out — capped off by a boss fight against the station's reactor sentinel.
 
 This is my Boot.dev capstone project.
 
-## What makes it different from a typical platformer
+## Motivation
+
+The capstone brief was open-ended — any language, any project — and I'd
+already gotten a taste of game dev from an earlier Boot.dev course (a
+vector-drawn Asteroids clone). I wanted this one to go further: real sprite
+art instead of procedural shapes, a tile-based level format instead of one
+hardcoded arena, and at least one mechanic that couldn't be bolted on as an
+afterthought. Gravity-flip was that mechanic — it meant the collision,
+jump, and animation code all had to key off a signed direction instead of
+assuming "down" is always the floor, which touches nearly everything in the
+physics layer. Python + Pygame kept the iteration loop fast enough to
+actually playtest and tune that mechanic dozens of times rather than fight
+a heavier engine's boilerplate.
+
+## Features
 
 - **Low-gravity movement.** Jumps are floatier than a standard platformer,
   matching the station setting.
@@ -46,12 +60,12 @@ This is my Boot.dev capstone project.
   (only while you're missing one) and vanishes again
   if you don't reach it in time.
 
-## How to run it
+## Quick Start
 
 Requires Python 3.13 and [uv](https://docs.astral.sh/uv/).
 
-```
-git clone <this-repo-url>
+```bash
+git clone https://github.com/6tjsjtmtnn-sys/hull-breach
 cd hull-breach
 uv run main.py
 ```
@@ -60,10 +74,10 @@ uv run main.py
 dependencies (pinned to `pygame==2.6.1`) automatically — no separate
 install step needed.
 
-## Controls
+## Usage
 
-The main menu has `[C] Controls` and `[R] Rules` screens in-game. Quick
-reference:
+From the main menu: `[ENTER]` to start, `[C]` for a controls reference,
+`[R]` for the rules, both viewable in-game at any time. Quick reference:
 
 | Action                | Keys                  |
 |------------------------|-----------------------|
@@ -73,18 +87,44 @@ reference:
 | Flip gravity (needs a charge) | `G`             |
 | Flip back to normal (always free) | `G` again  |
 
-## Running the tests
+Reach each level's exit sign to move on to the next. Watch the oxygen bar
+(top left) — it drains on its own and drops further if you get hit; blue
+pickups refill it. Green diamonds bank a gravity-flip charge. The 10th
+level swaps the oxygen bar for three hearts and drops you into the boss
+fight described above.
 
-A small `pytest` suite covers the parts that are meaningfully testable
-without a display — tile collision resolution, level-grid parsing, and the
-gravity-flip ground-check logic. Rendering, camera feel, and jump tuning
-were verified through manual playtesting and scripted bot walkthroughs
-during development instead, since those aren't the kind of thing a unit
-test can meaningfully assert on.
+## Contributing
 
+### Clone the repo
+
+```bash
+git clone https://github.com/6tjsjtmtnn-sys/hull-breach
+cd hull-breach
 ```
+
+### Run it
+
+```bash
+uv run main.py
+```
+
+### Run the test suite
+
+```bash
 uv run pytest
 ```
+
+The `pytest` suite covers the parts that are meaningfully testable without
+a display — tile collision resolution, level-grid parsing, and the
+gravity-flip ground-check logic. Rendering, camera feel, and jump tuning
+were verified through manual playtesting and scripted headless bot
+walkthroughs during development instead, since those aren't the kind of
+thing a unit test can meaningfully assert on.
+
+### Submit a pull request
+
+If you'd like to contribute, please fork the repository and open a pull
+request against the `main` branch.
 
 ## Project structure
 
